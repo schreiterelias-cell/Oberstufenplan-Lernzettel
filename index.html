@@ -1,0 +1,2144 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oberstufe Strategieplan</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  :root {
+    --bg: #0e0e12;
+    --surface: #16161d;
+    --surface2: #1e1e28;
+    --border: #2a2a38;
+    --text: #e8e8f0;
+    --muted: #6b6b85;
+    --vollgas: #ff4d6d;
+    --vollgas-bg: rgba(255,77,109,0.08);
+    --vollgas-border: rgba(255,77,109,0.25);
+    --solide: #ffd166;
+    --solide-bg: rgba(255,209,102,0.08);
+    --solide-border: rgba(255,209,102,0.25);
+    --easy: #06d6a0;
+    --easy-bg: rgba(6,214,160,0.08);
+    --easy-border: rgba(6,214,160,0.25);
+    --pruef: #818cf8;
+    --pruef-bg: rgba(129,140,248,0.1);
+    --warn: #f97316;
+    --warn-bg: rgba(249,115,22,0.08);
+    --warn-border: rgba(249,115,22,0.25);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Space Grotesk', sans-serif; min-height: 100vh; padding: 2rem 1rem; }
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  /* NAV TABS */
+  .tabs { display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
+  .tab { padding: 0.6rem 1.2rem; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+  .tab:hover { color: var(--text); border-color: var(--pruef); }
+  .tab.active { background: var(--pruef-bg); color: var(--pruef); border-color: var(--pruef); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* HEADER */
+  .header { text-align: center; margin-bottom: 2rem; padding: 2.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; position: relative; overflow: hidden; }
+  .header::before { content: ''; position: absolute; top: -60px; left: 50%; transform: translateX(-50%); width: 300px; height: 150px; background: radial-gradient(ellipse, rgba(129,140,248,0.15) 0%, transparent 70%); pointer-events: none; }
+  .header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 0.3rem; }
+  .header .subtitle { color: var(--muted); font-size: 0.95rem; }
+  .header .stats { display: flex; justify-content: center; gap: 2rem; margin-top: 1.5rem; flex-wrap: wrap; }
+  .stat { text-align: center; }
+  .stat .val { font-family: 'JetBrains Mono', monospace; font-size: 1.6rem; font-weight: 600; color: var(--pruef); }
+  .stat .lbl { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* COUNTDOWN */
+  .countdown { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .countdown-label { font-size: 0.85rem; color: var(--muted); }
+  .countdown-val { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 600; color: var(--pruef); }
+  .countdown-parts { display: flex; gap: 1.5rem; }
+  .cd-part { text-align: center; }
+  .cd-num { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; font-weight: 700; color: var(--pruef); }
+  .cd-lbl { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; }
+
+  /* LEGEND */
+  .legend { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--muted); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .dot.vollgas { background: var(--vollgas); }
+  .dot.solide { background: var(--solide); }
+  .dot.easy { background: var(--easy); }
+  .dot.pruef { background: var(--pruef); }
+  .hint-text { font-size: 0.72rem; color: var(--muted); margin-bottom: 1rem; }
+
+  /* STRESS WARNING */
+  .stress-warning { background: var(--warn-bg); border: 1px solid var(--warn-border); border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1.5rem; font-size: 0.85rem; color: var(--warn); display: flex; align-items: center; gap: 0.5rem; }
+
+  /* SEMESTER GRID */
+  .semesters { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; margin-bottom: 2.5rem; }
+  .semester-col { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .semester-header { padding: 1rem 1.25rem; background: var(--surface2); border-bottom: 1px solid var(--border); }
+  .sem-label { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.2rem; }
+  .sem-title { font-size: 1rem; font-weight: 600; }
+  .sem-stress { font-size: 0.75rem; margin-top: 0.4rem; padding: 0.2rem 0.6rem; border-radius: 99px; display: inline-block; font-weight: 500; }
+  .stress-high { background: var(--vollgas-bg); color: var(--vollgas); border: 1px solid var(--vollgas-border); }
+  .stress-mid { background: var(--solide-bg); color: var(--solide); border: 1px solid var(--solide-border); }
+  .stress-low { background: var(--easy-bg); color: var(--easy); border: 1px solid var(--easy-border); }
+  .sem-einbring { font-size: 0.7rem; color: var(--muted); margin-top: 0.4rem; }
+  .sem-einbring span { color: var(--pruef); font-weight: 600; }
+
+  /* PROGRESS BAR */
+  .sem-progress { margin-top: 0.5rem; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .sem-progress-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+
+  .fach-list { padding: 0.75rem; display: flex; flex-direction: column; gap: 0.4rem; }
+  .fach-item { border-radius: 8px; border: 1px solid transparent; overflow: hidden; }
+  .fach-item.vollgas { background: var(--vollgas-bg); border-color: var(--vollgas-border); }
+  .fach-item.solide { background: var(--solide-bg); border-color: var(--solide-border); }
+  .fach-item.easy { background: var(--easy-bg); border-color: var(--easy-border); }
+  .fach-main { display: flex; align-items: center; justify-content: space-between; padding: 0.55rem 0.75rem; cursor: pointer; user-select: none; }
+  .fach-left { display: flex; align-items: center; gap: 0.5rem; }
+  .fach-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .fach-dot.vollgas { background: var(--vollgas); }
+  .fach-dot.solide { background: var(--solide); }
+  .fach-dot.easy { background: var(--easy); }
+  .fach-name { font-size: 0.875rem; font-weight: 500; }
+  .fach-lk { font-size: 0.65rem; color: var(--pruef); background: var(--pruef-bg); padding: 0.1rem 0.4rem; border-radius: 4px; margin-left: 0.3rem; }
+  .fach-pruef { font-size: 0.65rem; color: var(--pruef); margin-left: 0.2rem; }
+  .fach-right { display: flex; align-items: center; gap: 0.5rem; }
+  .einbringen-badge { font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 600; }
+  .einbringen-badge.ja { background: rgba(129,140,248,0.15); color: var(--pruef); }
+  .einbringen-badge.nein { background: rgba(107,107,133,0.15); color: var(--muted); }
+  .toggle-icon { font-size: 0.65rem; color: var(--muted); transition: transform 0.2s; margin-left: 0.25rem; }
+  .fach-item.open .toggle-icon { transform: rotate(180deg); }
+  .fach-themen { display: none; padding: 0 0.75rem 0.6rem; border-top: 1px solid var(--border); }
+  .fach-item.open .fach-themen { display: block; }
+  .thema-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 0.5rem 0 0.3rem; }
+  .thema-list { list-style: none; display: flex; flex-direction: column; gap: 0.2rem; }
+  .thema-list li { font-size: 0.78rem; color: var(--text); line-height: 1.4; padding-left: 0.75rem; position: relative; }
+  .thema-list li::before { content: '›'; position: absolute; left: 0; color: var(--muted); }
+  .schwer-badge { font-size: 0.65rem; padding: 0.05rem 0.35rem; border-radius: 3px; margin-left: 0.3rem; vertical-align: middle; }
+  .schwer-badge.leicht { background: var(--easy-bg); color: var(--easy); border: 1px solid var(--easy-border); }
+  .schwer-badge.mittel { background: var(--solide-bg); color: var(--solide); border: 1px solid var(--solide-border); }
+  .schwer-badge.schwer { background: var(--vollgas-bg); color: var(--vollgas); border: 1px solid var(--vollgas-border); }
+  .grund-badge { font-size: 0.65rem; padding: 0.05rem 0.35rem; border-radius: 3px; margin-left: 0.3rem; vertical-align: middle; background: var(--easy-bg); color: var(--easy); border: 1px solid var(--easy-border); }
+
+  /* INFO CARDS */
+  .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; margin-bottom: 2.5rem; }
+  .info-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; }
+  .info-card h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 1rem; }
+  .info-row { display: flex; justify-content: space-between; align-items: center; padding: 0.45rem 0; border-bottom: 1px solid var(--border); font-size: 0.875rem; }
+  .info-row:last-child { border-bottom: none; }
+  .info-row .key { color: var(--muted); }
+  .info-row .val { font-weight: 500; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; }
+  .info-row .val.good { color: var(--easy); }
+  .info-row .val.mid { color: var(--solide); }
+  .info-row .val.bad { color: var(--vollgas); }
+  .pruef-list { display: flex; flex-direction: column; gap: 0.5rem; }
+  .pruef-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.75rem; background: var(--pruef-bg); border: 1px solid rgba(129,140,248,0.2); border-radius: 8px; font-size: 0.875rem; }
+  .pruef-item .p-name { font-weight: 500; }
+  .pruef-item .p-type { font-size: 0.7rem; color: var(--pruef); font-family: 'JetBrains Mono', monospace; }
+  .tip-list { display: flex; flex-direction: column; gap: 0.6rem; }
+  .tip { display: flex; gap: 0.75rem; font-size: 0.85rem; line-height: 1.5; color: var(--muted); }
+  .tip-icon { flex-shrink: 0; }
+
+  /* DEUTSCH */
+  .deutsch-section { background: var(--surface); border: 1px solid rgba(255,77,109,0.3); border-radius: 14px; overflow: hidden; margin-bottom: 2.5rem; }
+  .deutsch-header { display: flex; align-items: center; gap: 1rem; padding: 1.25rem 1.5rem; background: rgba(255,77,109,0.08); border-bottom: 1px solid rgba(255,77,109,0.2); }
+  .deutsch-title { font-size: 1.1rem; font-weight: 600; color: var(--vollgas); }
+  .deutsch-sub { font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; }
+  .deutsch-body { padding: 1.5rem; }
+  .deutsch-why { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; }
+  .deutsch-why-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 0.5rem; }
+  .deutsch-why-text { font-size: 0.875rem; line-height: 1.6; }
+  .deutsch-why-text strong { color: var(--vollgas); }
+  .deutsch-tips-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+  .deutsch-tip-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; }
+  .dtip-icon { font-size: 1.2rem; margin-bottom: 0.5rem; }
+  .dtip-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; }
+  .dtip-text { font-size: 0.8rem; line-height: 1.5; color: var(--muted); }
+
+  /* RECHNER */
+  .rechner { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; margin-bottom: 2.5rem; }
+  .rechner h2 { font-size: 1rem; font-weight: 600; margin-bottom: 0.3rem; }
+  .rechner-sub { font-size: 0.8rem; color: var(--muted); margin-bottom: 1.5rem; }
+  .rechner-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem; }
+  .rechner-fach { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; }
+  .rechner-fach label { font-size: 0.75rem; color: var(--muted); display: block; margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .rechner-fach-name { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; }
+  .sem-inputs { display: flex; gap: 0.4rem; }
+  .sem-inputs input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 0.35rem 0.5rem; color: var(--text); font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; text-align: center; outline: none; }
+  .sem-inputs input:focus { border-color: var(--pruef); }
+  .sem-inputs input::placeholder { color: var(--muted); }
+  .rechner-btn { background: var(--pruef); color: white; border: none; border-radius: 8px; padding: 0.75rem 1.5rem; font-size: 0.875rem; font-weight: 600; cursor: pointer; font-family: 'Space Grotesk', sans-serif; transition: opacity 0.15s; }
+  .rechner-btn:hover { opacity: 0.85; }
+  .rechner-result { margin-top: 1.5rem; display: none; }
+  .result-box { background: var(--pruef-bg); border: 1px solid rgba(129,140,248,0.3); border-radius: 10px; padding: 1.25rem; text-align: center; margin-bottom: 1rem; }
+  .result-note { font-size: 2.5rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--pruef); }
+  .result-label { font-size: 0.8rem; color: var(--muted); margin-top: 0.2rem; }
+  .result-rows { display: flex; flex-direction: column; gap: 0.4rem; }
+  .result-row { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 0.4rem 0.75rem; background: var(--surface2); border-radius: 6px; }
+  .result-row .rkey { color: var(--muted); }
+  .result-row .rval { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+
+  /* NOTFALL */
+  .notfall { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; margin-bottom: 2.5rem; }
+  .notfall h2 { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; }
+  .notfall-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+  .notfall-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; }
+  .notfall-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+  .notfall-icon { font-size: 1rem; }
+  .notfall-text { font-size: 0.8rem; line-height: 1.6; color: var(--muted); }
+  .notfall-calc { margin-top: 0.75rem; background: var(--bg); border-radius: 6px; padding: 0.6rem 0.75rem; font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; color: var(--pruef); }
+
+  /* LERNZETTEL */
+  .lz-subnav { display:flex; align-items:center; gap:0.9rem; margin-bottom:1.5rem; }
+  .lz-back { width:38px; height:38px; border-radius:50%; border:1px solid var(--border); background:var(--surface); color:var(--text); font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition: border-color .15s; }
+  .lz-back:hover { border-color: var(--pruef); color: var(--pruef); }
+  .lz-subnav-sub { font-family:'JetBrains Mono', monospace; font-size:0.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; }
+  .lz-subnav-title { font-size:1.25rem; font-weight:700; letter-spacing:-0.01em; }
+  .lz-intro { font-size:0.85rem; color:var(--muted); margin-bottom:1.5rem; }
+
+  .lz-fach-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:0.9rem; margin-bottom:1rem; }
+  .lz-fach-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:1.1rem 1.2rem; cursor:pointer; transition: border-color .15s, transform .15s; }
+  .lz-fach-card:hover { border-color:var(--pruef); transform:translateY(-2px); }
+  .lz-fach-top { display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem; }
+  .lz-fach-name { font-size:1.02rem; font-weight:600; }
+  .lz-fach-badges { display:flex; gap:0.3rem; flex-shrink:0; }
+  .lz-badge { font-family:'JetBrains Mono', monospace; font-size:0.62rem; padding:0.15rem 0.4rem; border-radius:5px; font-weight:600; letter-spacing:0.03em; }
+  .lz-badge.lk { background:var(--solide-bg); color:var(--solide); border:1px solid var(--solide-border); }
+  .lz-badge.p { background:var(--vollgas-bg); color:var(--vollgas); border:1px solid var(--vollgas-border); }
+  .lz-fach-count { font-size:0.75rem; color:var(--muted); margin-top:0.6rem; }
+
+  .lz-new-btn { background:var(--pruef); color:#fff; border:none; border-radius:9px; padding:0.75rem 1.4rem; font-size:0.875rem; font-weight:600; cursor:pointer; font-family:'Space Grotesk',sans-serif; display:inline-flex; align-items:center; gap:0.5rem; transition:opacity .15s; }
+  .lz-new-btn:hover { opacity:0.85; }
+  .lz-new-btn:disabled { opacity:0.5; cursor:default; }
+  .lz-btn-ghost { background:transparent; color:var(--muted); border:1px solid var(--border); border-radius:8px; padding:0.5rem 0.9rem; font-size:0.78rem; font-weight:500; cursor:pointer; font-family:'Space Grotesk',sans-serif; }
+  .lz-btn-ghost:hover { border-color:var(--pruef); color:var(--pruef); }
+  .lz-btn-ghost.danger:hover { border-color:var(--vollgas); color:var(--vollgas); }
+
+  .lz-history-list { display:flex; flex-direction:column; gap:0.6rem; margin-top:1.25rem; }
+  .lz-history-item { display:flex; justify-content:space-between; align-items:center; gap:0.75rem; padding:0.8rem 1rem; background:var(--surface); border:1px solid var(--border); border-radius:10px; cursor:pointer; }
+  .lz-history-item:hover { border-color:var(--pruef); }
+  .lz-h-thema { font-size:0.875rem; font-weight:500; }
+  .lz-h-date { font-family:'JetBrains Mono', monospace; font-size:0.7rem; color:var(--muted); margin-left:0.6rem; }
+  .lz-h-del { background:none; border:none; color:var(--muted); font-size:0.95rem; cursor:pointer; padding:0.2rem 0.4rem; }
+  .lz-h-del:hover { color:var(--vollgas); }
+  .lz-empty { font-size:0.85rem; color:var(--muted); text-align:center; padding:2rem 0; font-style:italic; }
+
+  .lz-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:1.5rem; margin-bottom:1.25rem; }
+  .lz-label { display:block; font-family:'JetBrains Mono', monospace; font-size:0.68rem; letter-spacing:0.07em; text-transform:uppercase; color:var(--muted); margin-bottom:0.5rem; margin-top:1.25rem; }
+  .lz-label:first-of-type { margin-top:0; }
+  .lz-input, .lz-textarea { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:0.65rem 0.8rem; color:var(--text); font-size:0.9rem; font-family:'Space Grotesk',sans-serif; outline:none; transition:border-color .15s; }
+  .lz-input:focus, .lz-textarea:focus { border-color:var(--pruef); }
+  .lz-textarea { min-height:100px; resize:vertical; line-height:1.6; }
+  .lz-hint { font-size:0.72rem; color:var(--muted); margin-top:0.4rem; }
+
+  .lz-dropzone { border:1.5px dashed var(--border); border-radius:10px; padding:1.5rem; text-align:center; cursor:pointer; transition:border-color .15s, background .15s; }
+  .lz-dropzone:hover, .lz-dropzone.drag { border-color:var(--pruef); background:var(--pruef-bg); }
+  .lz-dz-icon { font-size:1.5rem; margin-bottom:0.4rem; }
+  .lz-dz-text { font-size:0.85rem; color:var(--muted); }
+  .lz-dz-text strong { color:var(--pruef); }
+  .lz-thumbs { display:flex; flex-wrap:wrap; gap:0.6rem; margin-top:0.9rem; }
+  .lz-thumb { position:relative; width:72px; height:72px; border-radius:8px; overflow:hidden; border:1px solid var(--border); }
+  .lz-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+  .lz-thumb .lz-rm { position:absolute; top:2px; right:2px; width:18px; height:18px; border-radius:50%; background:rgba(14,14,18,0.85); color:#fff; border:none; font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+
+  .lz-error { background:var(--vollgas-bg); border:1px solid var(--vollgas-border); color:var(--vollgas); border-radius:10px; padding:0.85rem 1rem; font-size:0.85rem; margin-top:1rem; }
+  .lz-spinner { width:14px; height:14px; border-radius:50%; border:2px solid rgba(255,255,255,0.35); border-top-color:#fff; animation: lzspin 0.7s linear infinite; display:inline-block; vertical-align:middle; margin-right:0.4rem; }
+  @keyframes lzspin { to { transform: rotate(360deg); } }
+  .lz-hidden { display:none !important; }
+
+  .lz-export-row { display:flex; gap:0.6rem; margin-bottom:1.1rem; flex-wrap:wrap; }
+  .lz-content { font-size:0.9rem; line-height:1.75; color:var(--text); }
+  .lz-content h2 { font-size:1.2rem; font-weight:700; color:var(--pruef); margin:1.5rem 0 0.6rem; }
+  .lz-content h2:first-child { margin-top:0; }
+  .lz-content h3 { font-size:1rem; font-weight:600; margin:1.1rem 0 0.4rem; }
+  .lz-content p { margin:0.5rem 0; }
+  .lz-content ul { margin:0.5rem 0; padding-left:1.3rem; }
+  .lz-content li { margin:0.25rem 0; }
+  .lz-content strong { color:var(--pruef); font-weight:600; }
+  .lz-edit-area { min-height:280px; font-family:'JetBrains Mono', monospace; font-size:0.82rem; line-height:1.6; }
+
+  .lz-gaps { background:var(--warn-bg); border:1px solid var(--warn-border); border-radius:10px; padding:1rem 1.1rem; }
+  .lz-gaps ul { margin:0.5rem 0 0; padding-left:1.2rem; color:var(--warn); font-size:0.85rem; line-height:1.6; }
+
+  .lz-mode-toggle { display:flex; gap:0.5rem; margin-bottom:1.1rem; }
+  .lz-mode-btn { font-family:'JetBrains Mono', monospace; font-size:0.7rem; letter-spacing:0.04em; padding:0.4rem 0.85rem; border-radius:99px; border:1px solid var(--border); background:var(--surface2); color:var(--muted); cursor:pointer; }
+  .lz-mode-btn.active { background:var(--pruef-bg); border-color:var(--pruef); color:var(--pruef); }
+
+  .lz-deck-meta { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
+  .lz-deck-count { font-family:'JetBrains Mono', monospace; font-size:0.75rem; color:var(--muted); }
+  .lz-card-stage { perspective:1400px; margin:0 auto; max-width:420px; }
+  .lz-flip { position:relative; height:210px; cursor:pointer; }
+  .lz-flip-inner { position:relative; width:100%; height:100%; transition: transform .5s cubic-bezier(.4,.2,.2,1); transform-style:preserve-3d; }
+  .lz-flip.flipped .lz-flip-inner { transform: rotateY(180deg); }
+  .lz-face { position:absolute; inset:0; backface-visibility:hidden; border-radius:12px; padding:1.4rem; display:flex; align-items:center; justify-content:center; text-align:center; border:1px solid var(--border); }
+  .lz-face-front { background:var(--surface2); border-left:4px solid var(--vollgas); }
+  .lz-face-front span { font-size:1.05rem; font-weight:600; line-height:1.5; }
+  .lz-face-back { background:var(--surface2); transform:rotateY(180deg); border-left:4px solid var(--pruef); }
+  .lz-face-back span { font-size:0.88rem; line-height:1.6; color:var(--muted); }
+  .lz-tap-hint { position:absolute; bottom:6px; left:0; right:0; text-align:center; font-family:'JetBrains Mono', monospace; font-size:0.62rem; color:var(--muted); letter-spacing:0.06em; text-transform:uppercase; }
+  .lz-deck-nav { display:flex; justify-content:center; gap:0.6rem; margin-top:1.1rem; }
+  .lz-nav-btn { width:38px; height:38px; border-radius:50%; border:1px solid var(--border); background:var(--surface); color:var(--text); font-size:1rem; cursor:pointer; }
+  .lz-nav-btn:hover { border-color:var(--pruef); color:var(--pruef); }
+  .lz-nav-btn:disabled { opacity:0.3; cursor:default; }
+
+  .lz-quiz-progress { font-family:'JetBrains Mono', monospace; font-size:0.75rem; color:var(--muted); text-align:center; margin-bottom:0.6rem; }
+  .lz-quiz-actions { display:flex; justify-content:center; gap:0.7rem; margin-top:1.1rem; }
+  .lz-btn-correct, .lz-btn-wrong { border:none; border-radius:8px; padding:0.65rem 1.2rem; font-size:0.85rem; font-weight:600; cursor:pointer; color:#fff; flex:1; max-width:160px; font-family:'Space Grotesk',sans-serif; }
+  .lz-btn-correct { background:var(--easy); }
+  .lz-btn-wrong { background:var(--vollgas); }
+  .lz-quiz-summary { text-align:center; padding:1.5rem 0.5rem; }
+  .lz-quiz-score { font-family:'JetBrains Mono', monospace; font-size:2.4rem; font-weight:700; color:var(--pruef); }
+  .lz-quiz-score-lbl { font-size:0.8rem; color:var(--muted); margin-top:0.2rem; }
+  .lz-quiz-summary .lz-actions-row { display:flex; justify-content:center; gap:0.6rem; margin-top:1.2rem; flex-wrap:wrap; }
+
+  .footer { text-align: center; font-size: 0.75rem; color: var(--muted); padding-top: 1.5rem; border-top: 1px solid var(--border); margin-top: 1rem; }
+
+  /* PROGRESS BAR */
+  .lz-progress-wrap { margin-top:1rem; }
+  .lz-progress-track { height:6px; background:var(--border); border-radius:99px; overflow:hidden; }
+  .lz-progress-fill { height:100%; width:0%; background:linear-gradient(90deg, var(--pruef), #a5b0fb); border-radius:99px; transition:width .3s ease; }
+  .lz-progress-status { font-family:'JetBrains Mono', monospace; font-size:0.72rem; color:var(--muted); margin-top:0.5rem; }
+
+  /* KLAUSURMODUS */
+  .lz-klausur-btn { background:transparent; color:var(--pruef); border:1px solid var(--pruef); border-radius:9px; padding:0.75rem 1.4rem; font-size:0.875rem; font-weight:600; cursor:pointer; font-family:'Space Grotesk',sans-serif; margin-left:0.6rem; }
+  .lz-klausur-btn:hover { background:var(--pruef-bg); }
+  .lz-klausur-section-title { font-family:'JetBrains Mono', monospace; font-size:0.7rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--pruef); margin:2rem 0 0.75rem; display:flex; align-items:center; gap:0.4rem; }
+  .lz-badge.klausur { background:var(--pruef-bg); color:var(--pruef); border:1px solid rgba(129,140,248,0.3); }
+  .lz-check-list { display:flex; flex-direction:column; gap:0.6rem; margin-bottom:1.25rem; }
+  .lz-check-item { display:flex; align-items:center; gap:0.75rem; padding:0.75rem 1rem; background:var(--surface2); border:1px solid var(--border); border-radius:10px; cursor:pointer; }
+  .lz-check-item input { width:18px; height:18px; accent-color:var(--pruef); flex-shrink:0; cursor:pointer; }
+  .lz-check-item .lz-ci-thema { font-size:0.875rem; font-weight:500; }
+  .lz-check-item .lz-ci-date { font-family:'JetBrains Mono', monospace; font-size:0.7rem; color:var(--muted); margin-left:0.5rem; }
+  .lz-klausur-hint { font-size:0.78rem; color:var(--muted); margin-bottom:1rem; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="subtitle">Sachsen Gymnasium · Oberstufe · Dresden Klotzsche</div>
+    <h1>Dein Abitur-Strategieplan</h1>
+    <div class="stats">
+      <div class="stat"><div class="val">40</div><div class="lbl">Semester gesamt</div></div>
+      <div class="stat"><div class="val">8</div><div class="lbl">LK-Semester</div></div>
+      <div class="stat"><div class="val">32</div><div class="lbl">GK-Semester</div></div>
+      <div class="stat"><div class="val">5</div><div class="lbl">Prüfungsfächer</div></div>
+    </div>
+  </div>
+
+  <!-- COUNTDOWN -->
+  <div class="countdown">
+    <div>
+      <div class="countdown-label">⏳ Bis zum Abitur</div>
+      <div style="font-size:0.75rem;color:var(--muted);margin-top:0.2rem">Schriftliche Prüfungen ca. April/Mai 2028</div>
+    </div>
+    <div class="countdown-parts" id="countdown"></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('plan')">📋 Semesterplan</div>
+    <div class="tab" onclick="showTab('rechner')">🧮 Notenrechner</div>
+    <div class="tab" onclick="showTab('notfall')">🚨 Was-wenn-Plan</div>
+    <div class="tab" onclick="showTab('deutsch')">⚠️ Deutsch-Guide</div>
+    <div class="tab" onclick="showTab('lernzettel')">📝 Lernzettel</div>
+  </div>
+
+  <!-- TAB: PLAN -->
+  <div class="tab-content active" id="tab-plan">
+
+    <div class="legend">
+      <div class="legend-item"><div class="dot vollgas"></div> Vollgas — Prüfungsfach</div>
+      <div class="legend-item"><div class="dot solide"></div> Solide — einbringen, ordentliche Note</div>
+      <div class="legend-item"><div class="dot easy"></div> Entspannt — mind. 5 Punkte</div>
+    </div>
+    <p class="hint-text">💡 Klick auf ein Fach um Themen & Schwierigkeit zu sehen · Einbring-Semester wurden nach leichtestem Thema optimiert</p>
+
+    <div class="stress-warning">⚠️ <strong>12/I (11 Fächer) und 12/II (10 Fächer)</strong> sind deine vollsten Einbring-Semester, weil viele Fächer mit guten Noten dort zusätzlich eingebracht werden um auf 40 Semester zu kommen. Plane deine Lernzeit frühzeitig!
+    </div>
+
+    <div class="semesters">
+
+      <!-- 11/I -->
+      <div class="semester-col">
+        <div class="semester-header">
+          <div class="sem-label">1. Semester</div>
+          <div class="sem-title">11 / I</div>
+          <div class="sem-stress stress-mid">Mittlere Belastung</div>
+          <div class="sem-einbring">Einbringen: <span>10</span> Fächer</div>
+          <div class="sem-progress"><div class="sem-progress-fill" style="width:75%;background:var(--vollgas)"></div></div>
+        </div>
+        <div class="fach-list">
+
+          <div class="fach-item vollgas">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot vollgas"></div><span class="fach-name">Mathematik <span class="fach-lk">LK</span></span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 11/I <span class="grund-badge">✓ leichtestes Sem.</span></div>
+              <ul class="thema-list">
+                <li>Funktionen &amp; Grenzwerte <span class="schwer-badge leicht">leicht</span></li>
+                <li>Differentialrechnung Grundlagen <span class="schwer-badge mittel">mittel</span></li>
+                <li>Ableitungsregeln &amp; erste Anwendungen</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item vollgas">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot vollgas"></div><span class="fach-name">Physik <span class="fach-lk">LK</span></span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 11/I <span class="grund-badge">✓ leichtestes Sem.</span></div>
+              <ul class="thema-list">
+                <li>Mechanik: Kinematik <span class="schwer-badge leicht">leicht</span></li>
+                <li>Newtonsche Gesetze vertieft</li>
+                <li>Energie, Arbeit, Leistung</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item vollgas">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot vollgas"></div><span class="fach-name">Deutsch <span class="fach-pruef">P3</span></span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 11/I</div>
+              <ul class="thema-list">
+                <li>Kommunikation &amp; Sachtextanalyse <span class="schwer-badge leicht">leicht</span></li>
+                <li>Einstieg Literaturepochen</li>
+                <li>Sturm &amp; Drang / Klassik</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item vollgas">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot vollgas"></div><span class="fach-name">Geographie <span class="fach-pruef">P5</span></span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 11/I <span class="grund-badge">✓ leichtestes Sem.</span></div>
+              <ul class="thema-list">
+                <li>Geodynamik: Plattentektonik <span class="schwer-badge leicht">leicht</span></li>
+                <li>Klima &amp; Klimazonen</li>
+                <li>Geomorphologie Grundlagen</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item vollgas">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot vollgas"></div><span class="fach-name">Informatik <span class="fach-pruef">P4</span></span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 11/I <span class="grund-badge">✓ Prüfungsfach</span></div>
+              <ul class="thema-list">
+                <li>Grundlagen Programmierung <span class="schwer-badge leicht">leicht</span></li>
+                <li>Modellierung &amp; Algorithmen Basics</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item solide">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot solide"></div><span class="fach-name">Französisch</span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 11/I <span class="grund-badge">✓ leichtestes Sem.</span></div>
+              <ul class="thema-list">
+                <li>Vertiefung Grammatik Grundlagen <span class="schwer-badge leicht">leicht</span></li>
+                <li>Landeskunde Frankreich</li>
+                <li>Textarbeit &amp; Comprehension</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item solide">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot solide"></div><span class="fach-name">Chemie</span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 11/I <span class="grund-badge">✓ leichtestes Sem.</span></div>
+              <ul class="thema-list">
+                <li>Organische Chemie: Alkane/Alkene <span class="schwer-badge leicht">leicht</span></li>
+                <li>Reaktionsmechanismen Grundlagen</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item easy">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot easy"></div><span class="fach-name">Englisch</span></div>
+              <div class="fach-right"><span class="einbringen-badge nein">5 Punkte</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 11/I</div>
+              <ul class="thema-list"><li>Landeskunde UK/USA <span class="schwer-badge leicht">leicht</span></li></ul>
+            </div>
+          </div>
+
+          <div class="fach-item easy">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot easy"></div><span class="fach-name">Kunst</span></div>
+              <div class="fach-right"><span class="einbringen-badge nein">5 Punkte</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 11/I</div>
+              <ul class="thema-list"><li>Bildanalyse Grundlagen <span class="schwer-badge leicht">leicht</span></li></ul>
+            </div>
+          </div>
+
+          <div class="fach-item solide">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot solide"></div><span class="fach-name">Geschichte</span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 11/I <span class="grund-badge">✓ Pflicht alle 4 Sem.</span></div>
+              <ul class="thema-list"><li>Imperialismus &amp; 1. Weltkrieg <span class="schwer-badge leicht">leicht</span></li><li>Weimarer Republik</li></ul>
+            </div>
+          </div>
+
+          <div class="fach-item easy">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot solide"></div><span class="fach-name">Ethik</span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 11/I <span class="grund-badge">✓ leichtestes Sem.</span></div>
+              <ul class="thema-list"><li>Menschenwürde &amp; Grundpositionen <span class="schwer-badge leicht">leicht</span></li></ul>
+            </div>
+          </div>
+
+          <div class="fach-item solide">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot solide"></div><span class="fach-name">Sport</span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 11/I <span class="grund-badge">✓ leichtestes Sem.</span></div>
+              <ul class="thema-list"><li>Sportpraxis + Bewegungslehre</li></ul>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 11/II -->
+      <div class="semester-col">
+        <div class="semester-header">
+          <div class="sem-label">2. Semester</div>
+          <div class="sem-title">11 / II</div>
+          <div class="sem-stress stress-high">Hohes Stresslevel</div>
+          <div class="sem-einbring">Einbringen: <span>11</span> Fächer</div>
+          <div class="sem-progress"><div class="sem-progress-fill" style="width:80%;background:var(--vollgas)"></div></div>
+        </div>
+        <div class="fach-list">
+
+          <div class="fach-item vollgas">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot vollgas"></div><span class="fach-name">Mathematik <span class="fach-lk">LK</span></span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 11/II</div>
+              <ul class="thema-list">
+                <li>Integralrechnung <span class="schwer-badge mittel">mittel</span></li>
+                <li>Stammfunktionen &amp; bestimmte Integrale</li>
+                <li>Flächenberechnung</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item vollgas">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot vollgas"></div><span class="fach-name">Physik <span class="fach-lk">LK</span></span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 11/II <span class="grund-badge">✓ gutes Sem.</span></div>
+              <ul class="thema-list">
+                <li>Elektromagnetismus <span class="schwer-badge mittel">mittel</span></li>
+                <li>Elektrisches &amp; magnetisches Feld</li>
+                <li>Lorentzkraft</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item vollgas">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot vollgas"></div><span class="fach-name">Deutsch <span class="fach-pruef">P3</span></span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 11/II</div>
+              <ul class="thema-list">
+                <li>Romantik &amp; Realismus <span class="schwer-badge mittel">mittel</span></li>
+                <li>Gedichtinterpretation</li>
+                <li>Erörterung schreiben</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item vollgas">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot vollgas"></div><span class="fach-name">Geographie <span class="fach-pruef">P5</span></span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 11/II</div>
+              <ul class="thema-list">
+                <li>Bevölkerung &amp; Siedlung <span class="schwer-badge leicht">leicht</span></li>
+                <li>Globalisierung &amp; Wirtschaft</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item vollgas">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot vollgas"></div><span class="fach-name">Informatik <span class="fach-pruef">P4</span></span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 11/II <span class="grund-badge">✓ Prüfungsfach</span></div>
+              <ul class="thema-list">
+                <li>Objektorientierte Programmierung <span class="schwer-badge mittel">mittel</span></li>
+                <li>Erste Projekte &amp; Strukturen</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item solide">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot solide"></div><span class="fach-name">Französisch</span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 11/II</div>
+              <ul class="thema-list">
+                <li>Subjonctif &amp; Conditionnel <span class="schwer-badge mittel">mittel</span></li>
+                <li>Literarische Texte</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item solide">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot solide"></div><span class="fach-name">Geschichte</span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 11/II <span class="grund-badge">✓ bekanntes Thema</span></div>
+              <ul class="thema-list">
+                <li>Nationalsozialismus &amp; 2. Weltkrieg <span class="schwer-badge mittel">mittel</span></li>
+                <li>Holocaust — viel Lernmaterial verfügbar</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item solide">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot solide"></div><span class="fach-name">Kunst</span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 11/II <span class="grund-badge">✓ leichtestes Sem.</span></div>
+              <ul class="thema-list">
+                <li>Moderne Kunst &amp; Stilrichtungen <span class="schwer-badge leicht">leicht</span></li>
+                <li>Eigenes Kunstprojekt</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item solide">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot solide"></div><span class="fach-name">Englisch</span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 11/II <span class="grund-badge">✓ zugänglichstes Sem.</span></div>
+              <ul class="thema-list">
+                <li>Globalisierung auf Englisch <span class="schwer-badge mittel">mittel</span></li>
+                <li>Writing: Essay Grundlagen</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item solide">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot solide"></div><span class="fach-name">Chemie</span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 11/II</div>
+              <ul class="thema-list"><li>Aromaten &amp; Alkohole <span class="schwer-badge mittel">mittel</span></li></ul>
+            </div>
+          </div>
+
+          <div class="fach-item solide">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot solide"></div><span class="fach-name">Ethik</span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 11/II</div>
+              <ul class="thema-list"><li>Bioethik &amp; Medizinethik <span class="schwer-badge mittel">mittel</span></li></ul>
+            </div>
+          </div>
+
+          <div class="fach-item easy">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot easy"></div><span class="fach-name">Sport</span></div>
+              <div class="fach-right"><span class="einbringen-badge nein">5 Punkte</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 11/II</div>
+              <ul class="thema-list"><li>Sportpraxis + Trainingstheorie</li></ul>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 12/I -->
+      <div class="semester-col">
+        <div class="semester-header">
+          <div class="sem-label">3. Semester</div>
+          <div class="sem-title">12 / I</div>
+          <div class="sem-stress stress-high">Hohes Stresslevel</div>
+          <div class="sem-einbring">Einbringen: <span>10</span> Fächer</div>
+          <div class="sem-progress"><div class="sem-progress-fill" style="width:92%;background:var(--vollgas)"></div></div>
+        </div>
+        <div class="fach-list">
+
+          <div class="fach-item vollgas">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot vollgas"></div><span class="fach-name">Mathematik <span class="fach-lk">LK</span></span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 12/I</div>
+              <ul class="thema-list">
+                <li>Lineare Algebra &amp; Vektoren <span class="schwer-badge schwer">schwer</span></li>
+                <li>Analytische Geometrie</li>
+                <li>Matrizen</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item vollgas">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot vollgas"></div><span class="fach-name">Physik <span class="fach-lk">LK</span></span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 12/I</div>
+              <ul class="thema-list">
+                <li>Schwingungen &amp; Wellen <span class="schwer-badge mittel">mittel</span></li>
+                <li>Wellenoptik &amp; Interferenz</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item vollgas">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot vollgas"></div><span class="fach-name">Deutsch <span class="fach-pruef">P3</span></span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 12/I</div>
+              <ul class="thema-list">
+                <li>Moderne &amp; Expressionismus <span class="schwer-badge mittel">mittel</span></li>
+                <li>Dramenanalyse</li>
+                <li>Abi-Lektüre intensiv</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item vollgas">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot vollgas"></div><span class="fach-name">Informatik <span class="fach-pruef">P4</span></span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 12/I <span class="grund-badge">✓ leichtestes Sem.</span></div>
+              <ul class="thema-list">
+                <li>Algorithmen &amp; Datenstrukturen <span class="schwer-badge mittel">mittel</span></li>
+                <li>Datenbankmodelle (SQL)</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item vollgas">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot vollgas"></div><span class="fach-name">Geographie <span class="fach-pruef">P5</span></span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 12/I</div>
+              <ul class="thema-list">
+                <li>Stadtgeographie &amp; Raumplanung <span class="schwer-badge mittel">mittel</span></li>
+                <li>Agrargeographie &amp; Ernährung</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item solide">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot solide"></div><span class="fach-name">Geschichte</span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 12/I <span class="grund-badge">✓ gutes Thema</span></div>
+              <ul class="thema-list">
+                <li>Kalter Krieg &amp; DDR/BRD <span class="schwer-badge mittel">mittel</span></li>
+                <li>Sehr viel Lernmaterial verfügbar</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item easy">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot easy"></div><span class="fach-name">Ethik</span></div>
+              <div class="fach-right"><span class="einbringen-badge nein">5 Punkte</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 12/I</div>
+              <ul class="thema-list">
+                <li>Politische Ethik &amp; Gerechtigkeit <span class="schwer-badge mittel">mittel</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item easy">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot easy"></div><span class="fach-name">Französisch</span></div>
+              <div class="fach-right"><span class="einbringen-badge nein">5 Punkte</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 12/I</div>
+              <ul class="thema-list">
+                <li>Gesellschaft &amp; Medien (FR) <span class="schwer-badge mittel">mittel</span></li>
+                <li>Diskussion &amp; Argumentation</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item solide">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot solide"></div><span class="fach-name">Chemie</span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 12/I</div>
+              <ul class="thema-list"><li>Elektrochemie &amp; Redox <span class="schwer-badge schwer">schwer</span></li></ul>
+            </div>
+          </div>
+
+          <div class="fach-item solide">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot solide"></div><span class="fach-name">Englisch</span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 12/I</div>
+              <ul class="thema-list"><li>Medien &amp; Gesellschaft <span class="schwer-badge mittel">mittel</span></li></ul>
+            </div>
+          </div>
+
+          <div class="fach-item solide">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot solide"></div><span class="fach-name">Kunst</span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 12/I</div>
+              <ul class="thema-list"><li>Gestaltung &amp; Werkanalyse <span class="schwer-badge leicht">leicht</span></li></ul>
+            </div>
+          </div>
+
+          <div class="fach-item solide">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot solide"></div><span class="fach-name">Sport</span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 12/I</div>
+              <ul class="thema-list"><li>Sportpraxis + Sportpädagogik</li></ul>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 12/II -->
+      <div class="semester-col">
+        <div class="semester-header">
+          <div class="sem-label">4. Semester</div>
+          <div class="sem-title">12 / II</div>
+          <div class="sem-stress stress-high">Hohes Stresslevel</div>
+          <div class="sem-einbring">Einbringen: <span>9</span> Fächer</div>
+          <div class="sem-progress"><div class="sem-progress-fill" style="width:83%;background:var(--vollgas)"></div></div>
+        </div>
+        <div class="fach-list">
+
+          <div class="fach-item vollgas">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot vollgas"></div><span class="fach-name">Mathematik <span class="fach-lk">LK</span></span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 12/II</div>
+              <ul class="thema-list">
+                <li>Stochastik &amp; Wahrscheinlichkeit <span class="schwer-badge mittel">mittel</span></li>
+                <li>Abi-Wiederholung Analysis &amp; Geometrie</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item vollgas">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot vollgas"></div><span class="fach-name">Physik <span class="fach-lk">LK</span></span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 12/II</div>
+              <ul class="thema-list">
+                <li>Quantenmechanik &amp; Atomphysik <span class="schwer-badge schwer">schwer</span></li>
+                <li>Kernphysik &amp; Radioaktivität</li>
+                <li>Abi-Wiederholung</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item vollgas">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot vollgas"></div><span class="fach-name">Deutsch <span class="fach-pruef">P3</span></span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 12/II</div>
+              <ul class="thema-list">
+                <li>Gegenwartsliteratur <span class="schwer-badge mittel">mittel</span></li>
+                <li>Abi-Lektüre Vertiefung</li>
+                <li>Aufsatztypen Wiederholung</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item vollgas">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot vollgas"></div><span class="fach-name">Informatik <span class="fach-pruef">P4</span></span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 12/II</div>
+              <ul class="thema-list">
+                <li>Theoretische Informatik &amp; KI <span class="schwer-badge mittel">mittel</span></li>
+                <li>Prüfungsvorbereitung mündlich</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item vollgas">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot vollgas"></div><span class="fach-name">Geographie <span class="fach-pruef">P5</span></span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 12/II <span class="grund-badge">✓ gutes Thema</span></div>
+              <ul class="thema-list">
+                <li>Geopolitik &amp; aktuelle Themen <span class="schwer-badge mittel">mittel</span></li>
+                <li>Prüfungsvorbereitung mündlich</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item solide">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot solide"></div><span class="fach-name">Geschichte</span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 12/II <span class="grund-badge">✓ leichtestes Sem.</span></div>
+              <ul class="thema-list">
+                <li>Wiedervereinigung &amp; Europa <span class="schwer-badge leicht">leicht</span></li>
+                <li>Sehr bekanntes Thema, viel Material</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="fach-item solide">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot solide"></div><span class="fach-name">Kunst</span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 12/II</div>
+              <ul class="thema-list"><li>Abschlussprojekt &amp; Präsentation <span class="schwer-badge mittel">mittel</span></li></ul>
+            </div>
+          </div>
+
+          <div class="fach-item easy">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot easy"></div><span class="fach-name">Französisch</span></div>
+              <div class="fach-right"><span class="einbringen-badge nein">5 Punkte</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 12/II</div>
+              <ul class="thema-list"><li>Frankophonie &amp; aktuelle Themen</li></ul>
+            </div>
+          </div>
+
+          <div class="fach-item easy">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot easy"></div><span class="fach-name">Englisch</span></div>
+              <div class="fach-right"><span class="einbringen-badge nein">5 Punkte</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 12/II</div>
+              <ul class="thema-list"><li>Zukunftsthemen &amp; Technologie</li></ul>
+            </div>
+          </div>
+
+          <div class="fach-item solide">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot solide"></div><span class="fach-name">Chemie</span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 12/II</div>
+              <ul class="thema-list"><li>Stickstoffchemie &amp; Gleichgewichte <span class="schwer-badge schwer">schwer</span></li></ul>
+            </div>
+          </div>
+
+          <div class="fach-item easy">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot easy"></div><span class="fach-name">Ethik</span></div>
+              <div class="fach-right"><span class="einbringen-badge nein">5 Punkte</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 12/II</div>
+              <ul class="thema-list"><li>Technikethik &amp; KI-Ethik <span class="schwer-badge mittel">mittel</span></li></ul>
+            </div>
+          </div>
+
+          <div class="fach-item solide">
+            <div class="fach-main" onclick="toggle(this)">
+              <div class="fach-left"><div class="fach-dot solide"></div><span class="fach-name">Sport</span></div>
+              <div class="fach-right"><span class="einbringen-badge ja">einbringen</span><span class="toggle-icon">▼</span></div>
+            </div>
+            <div class="fach-themen">
+              <div class="thema-title">Themen 12/II <span class="grund-badge">✓ leichtestes Sem.</span></div>
+              <ul class="thema-list"><li>Sportpraxis + Sportpsychologie <span class="schwer-badge leicht">leicht</span></li></ul>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- INFO CARDS -->
+    <div class="info-grid">
+      <div class="info-card">
+        <h3>Deine Prüfungsfächer</h3>
+        <div class="pruef-list">
+          <div class="pruef-item"><span class="p-name">Mathematik</span><span class="p-type">P1 · LK schriftlich</span></div>
+          <div class="pruef-item"><span class="p-name">Physik</span><span class="p-type">P2 · LK schriftlich</span></div>
+          <div class="pruef-item"><span class="p-name">Deutsch</span><span class="p-type">P3 · GK schriftlich</span></div>
+          <div class="pruef-item"><span class="p-name">Informatik</span><span class="p-type">P4 · GK mündlich</span></div>
+          <div class="pruef-item"><span class="p-name">Geographie</span><span class="p-type">P5 · GK mündlich</span></div>
+        </div>
+      </div>
+      <div class="info-card">
+        <h3>Ausgangslage Klasse 10</h3>
+        <div class="info-row"><span class="key">Mathematik</span><span class="val good">1,13</span></div>
+        <div class="info-row"><span class="key">Physik</span><span class="val good">1,25</span></div>
+        <div class="info-row"><span class="key">Informatik</span><span class="val good">1,33</span></div>
+        <div class="info-row"><span class="key">Geographie</span><span class="val good">1,80</span></div>
+        <div class="info-row"><span class="key">Chemie</span><span class="val good">1,75</span></div>
+        <div class="info-row"><span class="key">Französisch</span><span class="val mid">2,40</span></div>
+        <div class="info-row"><span class="key">Geschichte</span><span class="val mid">2,13</span></div>
+        <div class="info-row"><span class="key">Deutsch</span><span class="val bad">3,08</span></div>
+        <div class="info-row"><span class="key">Englisch</span><span class="val bad">3,53</span></div>
+      </div>
+      <div class="info-card">
+        <h3>Wichtige Hinweise</h3>
+        <div class="tip-list">
+          <div class="tip"><span class="tip-icon">✅</span><span>Einbringen nach leichtestem Thema optimiert — grüne Badges zeigen warum dieses Semester gewählt wurde.</span></div>
+          <div class="tip"><span class="tip-icon">⭐</span><span>Chemie (1,75) und Ethik werden alle 4 Semester eingebracht, Kunst (1,50) und Sport 3x — deine guten Noten zählen so maximal mit!</span></div>
+          <div class="tip"><span class="tip-icon">💡</span><span>Englisch + Französisch zusammen 4 Sem: Französisch 11/I+11/II (2x), Englisch 11/II+12/I (2x).</span></div>
+          <div class="tip"><span class="tip-icon">📐</span><span>Mathe &amp; Physik zählen doppelt — hier stark bleiben federt Deutsch deutlich ab!</span></div>
+          <div class="tip"><span class="tip-icon">📋</span><span>Themen sind Schätzungen — genaue Reihenfolge mit Lehrern abgleichen!</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TAB: RECHNER -->
+  <div class="tab-content" id="tab-rechner">
+    <div class="rechner">
+      <h2>🧮 Abitur-Notenrechner</h2>
+      <p class="rechner-sub">Trag deine Semesternoten ein (1–15 Punkte) um deinen geschätzten Abiturschnitt zu sehen. Prüfungsfächer zählen 4x.</p>
+      <div class="rechner-grid" id="rechner-grid"></div>
+      <button class="rechner-btn" onclick="berechne()">Abiturnote berechnen</button>
+      <div class="rechner-result" id="rechner-result">
+        <div class="result-box">
+          <div class="result-note" id="result-note">—</div>
+          <div class="result-label">Geschätzter Abiturschnitt</div>
+        </div>
+        <div class="result-rows" id="result-rows"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: NOTFALL -->
+  <div class="tab-content" id="tab-notfall">
+    <div class="notfall">
+      <h2>🚨 Was-wenn-Plan</h2>
+      <div class="notfall-grid">
+        <div class="notfall-card">
+          <div class="notfall-title"><span class="notfall-icon">📉</span> Ich hab in Deutsch eine 4 geschrieben</div>
+          <div class="notfall-text">Deutsch geht alle 4 Semester rein. Eine 4 (6 Punkte) in einem Semester schadet, ist aber nicht fatal. Du brauchst in den anderen 3 Semester mind. 8–9 Punkte (Note 2–3) um den Schaden zu begrenzen.</div>
+          <div class="notfall-calc">1x 6 Pkt + 3x 9 Pkt = ⌀ 7,5 Pkt ≈ Note 3–</div>
+        </div>
+        <div class="notfall-card">
+          <div class="notfall-title"><span class="notfall-icon">📉</span> Ich hab in Mathe LK eine 4 geschrieben</div>
+          <div class="notfall-text">LK zählt doppelt aber du hast 4 Semester. Eine 4 (6 Pkt) in einem LK-Semester ist verkraftbar wenn du die anderen 3 stark hältst. Ziel: mind. 11–12 Punkte in den anderen Semestern.</div>
+          <div class="notfall-calc">1x 6 Pkt + 3x 12 Pkt = ⌀ 10,5 Pkt ≈ Note 2</div>
+        </div>
+        <div class="notfall-card">
+          <div class="notfall-title"><span class="notfall-icon">⚠️</span> Ich drohe Unterkurs zu werden (unter 5 Pkt)</div>
+          <div class="notfall-text">In Einbring-Semestern musst du mind. 5 Punkte haben. Unter 5 Punkte = Unterkurs. Du darfst maximal 8 Unterkurse haben. Sofort den Lehrer ansprechen und Nachschreiben oder Ausgleich organisieren.</div>
+          <div class="notfall-calc">Max. 8 Unterkurse erlaubt — danach droht Nicht-Zulassung zum Abi</div>
+        </div>
+        <div class="notfall-card">
+          <div class="notfall-title"><span class="notfall-icon">🎯</span> Ich will mein Abi von 2,3 auf 2,0 verbessern</div>
+          <div class="notfall-text">Der größte Hebel ist Deutsch verbessern (alle 4 Sem. Pflicht) und die LK-Noten steigern (zählen doppelt). Jeder Punkt mehr in Mathe LK über alle 4 Semester gibt dir ca. 0,1 besser im Schnitt.</div>
+          <div class="notfall-calc">+1 Punkt in allen 4 LK-Sem. ≈ ca. 0,1 besser im Abi</div>
+        </div>
+        <div class="notfall-card">
+          <div class="notfall-title"><span class="notfall-icon">💡</span> Ich will Prüfungsfach wechseln</div>
+          <div class="notfall-text">Das ist nur bis Anfang 12/I möglich. Wenn du merkst dass Geo oder Info dir Probleme macht, sprich früh mit dem Oberstufenberater — nicht erst kurz vor der Anmeldung.</div>
+          <div class="notfall-calc">Frist: Antrag spätestens Anfang Kurshalbjahr 12/I</div>
+        </div>
+        <div class="notfall-card">
+          <div class="notfall-title"><span class="notfall-icon">📊</span> Wie viel bringt eine Verbesserung in Prüfung?</div>
+          <div class="notfall-text">Abiturprüfungen zählen 4-fach in Block II. Ein Prüfungsergebnis von 10 statt 8 Punkten macht ca. 8 Punkte Unterschied in der Gesamtpunktzahl — das kann 0,1–0,2 im Schnitt ausmachen.</div>
+          <div class="notfall-calc">+2 Pkt in einer Prüfung ≈ +8 Pkt in Block II</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: DEUTSCH -->
+  <div class="tab-content" id="tab-deutsch">
+    <div class="deutsch-section" style="margin-bottom:0">
+      <div class="deutsch-header">
+        <div style="font-size:1.5rem">⚠️</div>
+        <div>
+          <div class="deutsch-title">Dein kritisches Fach: Deutsch</div>
+          <div class="deutsch-sub">Pflichtprüfungsfach · alle 4 Semester einbringen · schriftliche Abiturprüfung</div>
+        </div>
+      </div>
+      <div class="deutsch-body">
+        <div class="deutsch-why">
+          <div class="deutsch-why-title">Warum Deutsch so entscheidend ist</div>
+          <div class="deutsch-why-text">Anders als Englisch (3,53) kannst du bei Deutsch keine schlechten Semester weglassen — alle 4 gehen zwingend rein. Dazu kommt die schriftliche Abiturprüfung. Das macht Deutsch zum einzigen Schwachpunkt den du <strong>nicht umgehen kannst</strong>. Von Note 3 auf Note 2 in Deutsch verbessert deinen Schnitt um ca. 0,2–0,3.</div>
+        </div>
+        <div class="deutsch-tips-grid">
+          <div class="deutsch-tip-card"><div class="dtip-icon">📖</div><div class="dtip-title">Lesen &amp; Analysieren</div><div class="dtip-text">Lies regelmäßig anspruchsvolle Texte und üb Textanalyse. Im Abi kommt garantiert eine Analyse — das ist reine Übungssache.</div></div>
+          <div class="deutsch-tip-card"><div class="dtip-icon">✍️</div><div class="dtip-title">Aufsätze üben</div><div class="dtip-text">Schreib regelmäßig Aufsätze und lass sie korrigieren. Erörterung, Interpretation und Analyse sind die drei Hauptaufsatzformen im sächsischen Abitur.</div></div>
+          <div class="deutsch-tip-card"><div class="dtip-icon">📚</div><div class="dtip-title">Pflichtlektüren früh lesen</div><div class="dtip-text">Die Abiturlektüren werden früh angekündigt. Lies sie sofort — nicht erst kurz vor der Prüfung. Wer den Text wirklich kennt hat einen riesigen Vorteil.</div></div>
+          <div class="deutsch-tip-card"><div class="dtip-icon">🗣️</div><div class="dtip-title">Mündlich aktiv mitmachen</div><div class="dtip-text">In Deutsch zählt Mitarbeit stark. Meld dich regelmäßig, auch wenn nicht 100% sicher. Gute mündliche Note puffert eine schwächere Klausur gut ab.</div></div>
+          <div class="deutsch-tip-card"><div class="dtip-icon">🔁</div><div class="dtip-title">Ab 11/I sofort starten</div><div class="dtip-text">Deutsch verbessert sich nur durch kontinuierliches Üben — wer früh anfängt hat bis zum Abi einen echten Vorsprung.</div></div>
+          <div class="deutsch-tip-card"><div class="dtip-icon">💬</div><div class="dtip-title">Fachbegriffe lernen</div><div class="dtip-text">Rhetorische Mittel, Stilistik, Epochenwissen — wer die Begriffe kennt und anwendet bekommt automatisch bessere Noten in Analysen.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: LERNZETTEL -->
+  <div class="tab-content" id="tab-lernzettel">
+
+    <!-- LOCK SCREEN -->
+    <div id="lz-screen-lock">
+      <div class="lz-card" style="max-width:380px;margin:2rem auto;text-align:center;">
+        <div style="font-size:1.8rem;margin-bottom:0.5rem;">🔒</div>
+        <div class="lz-subnav-title" style="margin-bottom:1rem;">Lernzettel gesperrt</div>
+        <input type="password" class="lz-input" id="lz-passwordInput" placeholder="Passwort" style="text-align:center;" onkeydown="if(event.key==='Enter') lzUnlock()">
+        <div style="margin-top:1rem;">
+          <button class="lz-new-btn" onclick="lzUnlock()">Entsperren</button>
+        </div>
+        <div id="lz-lockError" class="lz-error lz-hidden" style="margin-top:1rem;">Falsches Passwort.</div>
+        <div id="lz-syncStatus" class="lz-hint" style="margin-top:1rem;"></div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="lz-screen-dashboard" class="lz-hidden">
+      <div class="lz-intro">Fach wählen — dort Lernzettel per KI erstellen (auch aus Foto-Mitschriften), Karteikarten üben, exportieren.</div>
+      <div class="lz-fach-grid" id="lz-fachGrid"></div>
+    </div>
+
+    <!-- FACH SCREEN -->
+    <div id="lz-screen-fach" class="lz-hidden">
+      <div class="lz-subnav">
+        <button class="lz-back" onclick="lzGoDashboard()">‹</button>
+        <div>
+          <div class="lz-subnav-sub">Fach</div>
+          <div class="lz-subnav-title" id="lz-fachTitle"></div>
+        </div>
+      </div>
+      <button class="lz-new-btn" onclick="lzGoCreate()">+ Neuer Lernzettel</button>
+      <button class="lz-klausur-btn" onclick="lzGoKlausur()">🎯 Klausurmodus</button>
+      <div class="lz-history-list" id="lz-historyList"></div>
+
+      <div class="lz-klausur-section-title">🎯 Klausur-Zusammenfassungen</div>
+      <div class="lz-history-list" id="lz-klausurList"></div>
+    </div>
+
+    <!-- KLAUSURMODUS SELECTION SCREEN -->
+    <div id="lz-screen-klausur" class="lz-hidden">
+      <div class="lz-subnav">
+        <button class="lz-back" onclick="lzGoBack()">‹</button>
+        <div>
+          <div class="lz-subnav-sub" id="lz-klausurSub"></div>
+          <div class="lz-subnav-title">Klausurmodus</div>
+        </div>
+      </div>
+      <div class="lz-klausur-hint">Wähl aus, welche Lernzettel in die Zusammenfassung sollen — die KI fasst sie zu einem einzigen zusammen (Original-Lernzettel bleiben erhalten).</div>
+      <div class="lz-card">
+        <div class="lz-check-list" id="lz-klausurCheckList"></div>
+        <button class="lz-new-btn" id="lz-klausurBtn" onclick="lzGenerateKlausur()" disabled>Zusammenfassen</button>
+        <div class="lz-progress-wrap lz-hidden" id="lz-klausurProgressWrap">
+          <div class="lz-progress-track"><div class="lz-progress-fill" id="lz-klausurProgressFill"></div></div>
+          <div class="lz-progress-status" id="lz-klausurProgressStatus">Startet …</div>
+        </div>
+        <div id="lz-klausurErrorBox" class="lz-error lz-hidden"></div>
+      </div>
+    </div>
+
+    <!-- CREATE SCREEN -->
+    <div id="lz-screen-create" class="lz-hidden">
+      <div class="lz-subnav">
+        <button class="lz-back" onclick="lzGoBack()">‹</button>
+        <div>
+          <div class="lz-subnav-sub" id="lz-createSub"></div>
+          <div class="lz-subnav-title">Neuer Lernzettel</div>
+        </div>
+      </div>
+      <div class="lz-card">
+        <label class="lz-label">Thema</label>
+        <input type="text" class="lz-input" id="lz-topic" placeholder="z. B. Doppelspaltexperiment, Binomische Formeln, Novemberrevolution …">
+
+        <label class="lz-label">Mitschrift als Foto</label>
+        <div class="lz-dropzone" id="lz-dropzone" onclick="document.getElementById('lz-fileInput').click()">
+          <div class="lz-dz-icon">📷</div>
+          <div class="lz-dz-text"><strong>Fotos hochladen</strong> oder hier reinziehen</div>
+        </div>
+        <input type="file" id="lz-fileInput" accept="image/*" multiple style="display:none">
+        <div class="lz-thumbs" id="lz-thumbs"></div>
+        <div class="lz-hint">Mehrere Fotos möglich — die KI liest deine Mitschrift direkt von den Bildern. Formeln werden als $...$ erkannt und richtig dargestellt.</div>
+
+        <label class="lz-label">Zusätzliche Notizen (optional)</label>
+        <textarea class="lz-textarea" id="lz-notes" placeholder="Falls du noch was in Textform ergänzen willst …"></textarea>
+
+        <div style="margin-top:1.25rem;">
+          <button class="lz-new-btn" id="lz-generateBtn" onclick="lzGenerate()"><span id="lz-btnLabel">Lernzettel erstellen</span></button>
+          <div class="lz-progress-wrap lz-hidden" id="lz-progressWrap">
+            <div class="lz-progress-track"><div class="lz-progress-fill" id="lz-progressFill"></div></div>
+            <div class="lz-progress-status" id="lz-progressStatus">Startet …</div>
+          </div>
+        </div>
+        <div id="lz-errorBox" class="lz-error lz-hidden"></div>
+      </div>
+    </div>
+
+    <!-- RESULTS SCREEN -->
+    <div id="lz-screen-results" class="lz-hidden">
+      <div class="lz-subnav">
+        <button class="lz-back" onclick="lzGoBack()">‹</button>
+        <div>
+          <div class="lz-subnav-sub" id="lz-resultsSub"></div>
+          <div class="lz-subnav-title" id="lz-resultsTitle"></div>
+        </div>
+      </div>
+
+      <div class="lz-export-row">
+        <button class="lz-btn-ghost" id="lz-editBtn" onclick="lzToggleEdit()">✎ Bearbeiten</button>
+        <button class="lz-btn-ghost" onclick="lzExportPDF()">⬇ PDF</button>
+        <button class="lz-btn-ghost" onclick="lzExportWord()">⬇ Word</button>
+        <button class="lz-btn-ghost danger" onclick="lzDeleteCurrent()">🗑 Löschen</button>
+      </div>
+
+      <div class="lz-card">
+        <div class="lz-content" id="lz-lernzettelContent"></div>
+        <div id="lz-lernzettelEdit" class="lz-hidden">
+          <textarea class="lz-textarea lz-edit-area" id="lz-lernzettelTextarea"></textarea>
+          <div class="lz-hint">Markdown: <code>## Abschnitt</code>, <code>**fett**</code>, <code>- Liste</code>. Formeln: <code>$x^2$</code> inline, <code>$$...$$</code> für eigene Zeile.</div>
+          <div style="margin-top:1rem; display:flex; gap:0.6rem;">
+            <button class="lz-new-btn" onclick="lzSaveEdit()">Speichern</button>
+            <button class="lz-btn-ghost" onclick="lzCancelEdit()">Abbrechen</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="lz-gapsBox" class="lz-card lz-hidden">
+        <div class="lz-gaps">
+          <div class="lz-label" style="margin-top:0;color:var(--warn)">Möglicherweise fehlt noch</div>
+          <ul id="lz-gapsList"></ul>
+        </div>
+      </div>
+
+      <div class="lz-card">
+        <div class="lz-deck-meta">
+          <div class="lz-label" style="margin:0;">Karteikarten</div>
+          <div class="lz-deck-count" id="lz-deckCount">1 / 1</div>
+        </div>
+        <div class="lz-mode-toggle">
+          <button class="lz-mode-btn active" id="lz-modeBrowseBtn" onclick="lzSetCardMode('browse')">Durchklicken</button>
+          <button class="lz-mode-btn" id="lz-modeQuizBtn" onclick="lzSetCardMode('quiz')">Quiz</button>
+        </div>
+
+        <div id="lz-browseMode">
+          <div class="lz-card-stage">
+            <div class="lz-flip" id="lz-flashcard" onclick="lzFlipCard()">
+              <div class="lz-flip-inner">
+                <div class="lz-face lz-face-front"><span id="lz-cardFront"></span></div>
+                <div class="lz-face lz-face-back"><span id="lz-cardBack"></span></div>
+              </div>
+              <div class="lz-tap-hint">Zum Umdrehen tippen</div>
+            </div>
+          </div>
+          <div class="lz-deck-nav">
+            <button class="lz-nav-btn" id="lz-prevBtn" onclick="lzPrevCard()">‹</button>
+            <button class="lz-nav-btn" onclick="lzShuffleCards()" title="Mischen">⟲</button>
+            <button class="lz-nav-btn" id="lz-nextBtn" onclick="lzNextCard()">›</button>
+          </div>
+        </div>
+
+        <div id="lz-quizMode" class="lz-hidden">
+          <div id="lz-quizActive">
+            <div class="lz-quiz-progress" id="lz-quizProgress"></div>
+            <div class="lz-card-stage">
+              <div class="lz-flip" id="lz-quizCard" onclick="lzQuizReveal()">
+                <div class="lz-flip-inner">
+                  <div class="lz-face lz-face-front"><span id="lz-quizFront"></span></div>
+                  <div class="lz-face lz-face-back"><span id="lz-quizBack"></span></div>
+                </div>
+                <div class="lz-tap-hint" id="lz-quizTapHint">Zum Zeigen der Antwort tippen</div>
+              </div>
+            </div>
+            <div class="lz-quiz-actions" id="lz-quizActions"></div>
+          </div>
+          <div id="lz-quizDone" class="lz-quiz-summary lz-hidden"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    Strategieplan · Sachsen Gymnasium Oberstufe · Themen basieren auf sächsischem Lehrplan · Oberstufenberater fragen!
+  </div>
+
+</div>
+
+<script>
+// TABS
+function showTab(id) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// TOGGLE FACH
+function toggle(el) {
+  el.closest('.fach-item').classList.toggle('open');
+}
+
+// COUNTDOWN
+function updateCountdown() {
+  const abiDate = new Date('2028-04-25');
+  const now = new Date();
+  const diff = abiDate - now;
+  if (diff < 0) { document.getElementById('countdown').innerHTML = '<div style="color:var(--easy);font-weight:600">Abitur geschafft! 🎉</div>'; return; }
+  const days = Math.floor(diff / (1000*60*60*24));
+  const months = Math.floor(days / 30);
+  const weeks = Math.floor((days % 30) / 7);
+  const remDays = days % 7;
+  document.getElementById('countdown').innerHTML = `
+    <div class="cd-part"><div class="cd-num">${Math.floor(days/365)}</div><div class="cd-lbl">Jahre</div></div>
+    <div class="cd-part"><div class="cd-num">${months % 12}</div><div class="cd-lbl">Monate</div></div>
+    <div class="cd-part"><div class="cd-num">${weeks}</div><div class="cd-lbl">Wochen</div></div>
+    <div class="cd-part"><div class="cd-num">${remDays}</div><div class="cd-lbl">Tage</div></div>`;
+}
+updateCountdown();
+
+// RECHNER SETUP
+const faecher = [
+  { name: 'Mathematik', lk: true, pruef: true, sems: [1,1,1,1] },
+  { name: 'Physik', lk: true, pruef: true, sems: [1,1,1,1] },
+  { name: 'Deutsch', lk: false, pruef: true, sems: [1,1,1,1] },
+  { name: 'Geographie', lk: false, pruef: true, sems: [1,1,1,1] },
+  { name: 'Informatik', lk: false, pruef: true, sems: [1,1,1,1] },
+  { name: 'Geschichte', lk: false, pruef: false, sems: [1,1,1,1] },
+  { name: 'Chemie', lk: false, pruef: false, sems: [1,1,1,1] },
+  { name: 'Ethik', lk: false, pruef: false, sems: [1,1,0,0] },
+  { name: 'Sport', lk: false, pruef: false, sems: [1,0,1,1] },
+  { name: 'Kunst', lk: false, pruef: false, sems: [0,1,1,1] },
+  { name: 'Französisch', lk: false, pruef: false, sems: [1,1,0,0] },
+  { name: 'Englisch', lk: false, pruef: false, sems: [0,1,1,0] },
+];
+
+const grid = document.getElementById('rechner-grid');
+faecher.forEach((f, i) => {
+  const einbringSems = f.sems.filter(s => s === 1).length;
+  const labels = ['11/I','11/II','12/I','12/II'];
+  let inputs = '';
+  f.sems.forEach((s, j) => {
+    if (s === 1) {
+      inputs += `<input type="number" min="0" max="15" placeholder="${labels[j]}" id="f${i}_s${j}" title="${labels[j]}">`;
+    } else {
+      inputs += `<input type="number" min="0" max="15" placeholder="—" id="f${i}_s${j}" style="opacity:0.3" title="Nicht eingebracht">`;
+    }
+  });
+  grid.innerHTML += `
+    <div class="rechner-fach">
+      <div class="rechner-fach-name">${f.name}${f.lk ? ' <span style="font-size:0.7rem;color:var(--pruef);background:var(--pruef-bg);padding:0.1rem 0.4rem;border-radius:4px">LK</span>' : ''}${f.pruef ? ' <span style="font-size:0.7rem;color:var(--pruef)">P</span>' : ''}</div>
+      <label>Punkte pro Sem. (0–15) · ${einbringSems} einbringen</label>
+      <div class="sem-inputs">${inputs}</div>
+    </div>`;
+});
+
+function berechne() {
+  let block1Punkte = 0;
+  let block1Anzahl = 0;
+  let rows = '';
+
+  faecher.forEach((f, i) => {
+    let semPunkte = [];
+    f.sems.forEach((s, j) => {
+      const val = parseInt(document.getElementById(`f${i}_s${j}`).value);
+      if (s === 1 && !isNaN(val)) {
+        const gewichtet = f.lk ? val * 2 : val;
+        semPunkte.push(val);
+        block1Punkte += gewichtet;
+        block1Anzahl += f.lk ? 2 : 1;
+      }
+    });
+    if (semPunkte.length > 0) {
+      const avg = (semPunkte.reduce((a,b)=>a+b,0) / semPunkte.length).toFixed(1);
+      rows += `<div class="result-row"><span class="rkey">${f.name}${f.lk?' (LK×2)':''}</span><span class="rval" style="color:${avg>=10?'var(--easy)':avg>=7?'var(--solide)':'var(--vollgas)'}">${avg} Pkt</span></div>`;
+    }
+  });
+
+  if (block1Anzahl === 0) { alert('Bitte mindestens ein Fach eintragen!'); return; }
+
+  const durchschnittPunkte = block1Punkte / block1Anzahl;
+  // Umrechnung Punkte -> Note (sächsisch)
+  let note;
+  if (durchschnittPunkte >= 13.5) note = 1.0;
+  else if (durchschnittPunkte >= 12.5) note = 1.3;
+  else if (durchschnittPunkte >= 11.5) note = 1.7;
+  else if (durchschnittPunkte >= 10.5) note = 2.0;
+  else if (durchschnittPunkte >= 9.5) note = 2.3;
+  else if (durchschnittPunkte >= 8.5) note = 2.7;
+  else if (durchschnittPunkte >= 7.5) note = 3.0;
+  else if (durchschnittPunkte >= 6.5) note = 3.3;
+  else if (durchschnittPunkte >= 5.5) note = 3.7;
+  else if (durchschnittPunkte >= 4.5) note = 4.0;
+  else note = 5.0;
+
+  document.getElementById('result-note').textContent = note.toFixed(1);
+  document.getElementById('result-rows').innerHTML = rows;
+  document.getElementById('rechner-result').style.display = 'block';
+}
+
+/* ===================== LERNZETTEL ===================== */
+const GEMINI_API_KEY = "AQ.Ab8RN6Lj4VtcJnRCqiRHa4QEPBhSNt7SoAyKkYqQrBffi4IagA";
+
+/* ---- SUPABASE ---- */
+const SUPABASE_URL = "https://cnilfryqivsetqigcqss.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNuaWxmcnlxaXZzZXRxaWdjcXNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzNzgyMzYsImV4cCI6MjA5OTk1NDIzNn0.nj2GM1O3E1rpXRrqHwL_v8C6IPjYtyZTRlU3Ohv5js0";
+const LZ_PASSWORD = "12345678";
+let sb = null;
+if(window.supabase && SUPABASE_URL.startsWith('http')){
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
+let lzCache = { history: {}, klausur: {} };
+
+function lzUnlock(){
+  const val = document.getElementById('lz-passwordInput').value;
+  const err = document.getElementById('lz-lockError');
+  if(val !== LZ_PASSWORD){
+    err.classList.remove('lz-hidden');
+    return;
+  }
+  err.classList.add('lz-hidden');
+  localStorage.setItem('lz_unlocked', 'true');
+  lzBoot();
+}
+async function lzBoot(){
+  document.getElementById('lz-screen-lock').classList.add('lz-hidden');
+  document.getElementById('lz-screen-dashboard').classList.remove('lz-hidden');
+  await lzSyncFromSupabase();
+  lzRenderDashboard();
+}
+async function lzSyncFromSupabase(){
+  const status = document.getElementById('lz-syncStatus');
+  if(!sb){
+    if(status) status.textContent = 'Supabase nicht konfiguriert — Daten werden nur lokal gespeichert.';
+    lzCache = { history: JSON.parse(localStorage.getItem(lzStoreKey())) || {}, klausur: JSON.parse(localStorage.getItem(lzKlausurStoreKey())) || {} };
+    return;
+  }
+  try{
+    const { data, error } = await sb.from('lernzettel').select('*').order('created_at', { ascending: true });
+    if(error) throw error;
+    lzCache = { history: {}, klausur: {} };
+    (data || []).forEach(row => {
+      const item = {
+        id: row.id, thema: row.thema, dateLabel: row.date_label, lernzettel: row.lernzettel,
+        gaps: row.gaps || [], flashcards: row.flashcards || [], fach: row.fach,
+        kind: row.kind === 'klausur' ? 'klausur' : undefined, sourceThemen: row.source_themen || []
+      };
+      const bucket = row.kind === 'klausur' ? lzCache.klausur : lzCache.history;
+      bucket[row.fach] = bucket[row.fach] || [];
+      bucket[row.fach].push(item);
+    });
+  }catch(e){
+    console.error('Supabase-Sync fehlgeschlagen', e);
+    if(status) status.textContent = 'Konnte nicht mit Supabase verbinden — prüf die Zugangsdaten.';
+  }
+}
+async function lzDbInsert(item){
+  if(!sb) return;
+  try{
+    await sb.from('lernzettel').insert({
+      id: item.id, fach: item.fach, thema: item.thema, date_label: item.dateLabel,
+      lernzettel: item.lernzettel, gaps: item.gaps, flashcards: item.flashcards,
+      kind: item.kind || 'normal', source_themen: item.sourceThemen || []
+    });
+  }catch(e){ console.error('Supabase insert fehlgeschlagen', e); }
+}
+async function lzDbUpdate(id, fields){
+  if(!sb) return;
+  try{ await sb.from('lernzettel').update(fields).eq('id', id); }
+  catch(e){ console.error('Supabase update fehlgeschlagen', e); }
+}
+async function lzDbDelete(id){
+  if(!sb) return;
+  try{ await sb.from('lernzettel').delete().eq('id', id); }
+  catch(e){ console.error('Supabase delete fehlgeschlagen', e); }
+}
+const GEMINI_MODEL = "gemini-flash-latest";
+
+let lzSelectedFach = null;
+let lzUploadedImages = [];
+let lzFlashcards = [];
+let lzCurrentCard = 0;
+let lzCurrentItem = null;
+let lzCardMode = 'browse';
+let lzQuiz = null;
+let lzNavStack = [];
+
+function lzStoreKey(){ return 'lernzettel_history_v1'; }
+function lzLoadHistory(){ return lzCache.history; }
+function lzLoadKlausur(){ return lzCache.klausur; }
+function lzEscapeHtml(s){ const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function lzRenderMath(el){ if(window.renderMathInElement){ renderMathInElement(el, { delimiters: [ {left:'$$', right:'$$', display:true}, {left:'$', right:'$', display:false} ], throwOnError:false }); } }
+
+function lzKlausurStoreKey(){ return 'lernzettel_klausur_v1'; }
+
+function lzShowScreen(id){
+  ['dashboard','fach','create','results','klausur'].forEach(s => document.getElementById('lz-screen-'+s).classList.add('lz-hidden'));
+  document.getElementById('lz-screen-'+id).classList.remove('lz-hidden');
+}
+function lzGoDashboard(){ lzNavStack = []; lzRenderDashboard(); lzShowScreen('dashboard'); }
+function lzGoFach(name){
+  lzSelectedFach = name;
+  lzNavStack = ['dashboard'];
+  document.getElementById('lz-fachTitle').textContent = name;
+  lzRenderFachScreen();
+  lzShowScreen('fach');
+}
+function lzGoCreate(){
+  lzNavStack.push('fach');
+  lzUploadedImages = []; lzRenderThumbs();
+  document.getElementById('lz-topic').value=''; document.getElementById('lz-notes').value='';
+  document.getElementById('lz-errorBox').classList.add('lz-hidden');
+  document.getElementById('lz-createSub').textContent = lzSelectedFach;
+  lzShowScreen('create');
+}
+function lzGoKlausur(){
+  lzNavStack.push('fach');
+  document.getElementById('lz-klausurSub').textContent = lzSelectedFach;
+  document.getElementById('lz-klausurErrorBox').classList.add('lz-hidden');
+  lzRenderKlausurCheckList();
+  lzShowScreen('klausur');
+}
+function lzGoResults(item){
+  lzNavStack.push('fach');
+  lzCurrentItem = item;
+  document.getElementById('lz-resultsTitle').textContent = item.thema || '(ohne Thema)';
+  document.getElementById('lz-resultsSub').textContent = item.fach + (item.kind === 'klausur' ? ' · 🎯 Klausur-Zusammenfassung' : '');
+  lzRenderResults(item);
+  lzShowScreen('results');
+}
+function lzGoBack(){
+  const prev = lzNavStack.pop();
+  if(prev === 'fach'){ document.getElementById('lz-fachTitle').textContent = lzSelectedFach; lzRenderFachScreen(); lzShowScreen('fach'); }
+  else lzGoDashboard();
+}
+
+function lzRenderDashboard(){
+  const all = lzLoadHistory();
+  const grid = document.getElementById('lz-fachGrid');
+  grid.innerHTML = faecher.map(f => {
+    let badges = '';
+    if(f.lk) badges += '<span class="lz-badge lk">LK</span>';
+    if(f.pruef) badges += '<span class="lz-badge p">P</span>';
+    const count = (all[f.name] || []).length;
+    return `<div class="lz-fach-card" onclick="lzGoFach('${f.name}')">
+      <div class="lz-fach-top"><div class="lz-fach-name">${f.name}</div><div class="lz-fach-badges">${badges}</div></div>
+      <div class="lz-fach-count">${count === 0 ? 'Noch keine Lernzettel' : count + ' Lernzettel'}</div>
+    </div>`;
+  }).join('');
+}
+
+function lzRenderFachScreen(){
+  const all = lzLoadHistory();
+  const items = (all[lzSelectedFach] || []).slice().reverse();
+  const list = document.getElementById('lz-historyList');
+  if(items.length === 0){
+    list.innerHTML = '<div class="lz-empty">Noch keine Lernzettel für ' + lzSelectedFach + '.<br>Leg oben direkt los.</div>';
+  } else {
+    list.innerHTML = items.map(item => `
+      <div class="lz-history-item" onclick='lzGoResults(${JSON.stringify(item)})'>
+        <div><span class="lz-h-thema">${lzEscapeHtml(item.thema || '(ohne Thema)')}</span><span class="lz-h-date">${item.dateLabel}</span></div>
+        <button class="lz-h-del" onclick="event.stopPropagation();lzDeleteHistoryItem('${item.id}')">✕</button>
+      </div>`).join('');
+  }
+
+  const kAll = lzLoadKlausur();
+  const kItems = (kAll[lzSelectedFach] || []).slice().reverse();
+  const kList = document.getElementById('lz-klausurList');
+  if(kItems.length === 0){
+    kList.innerHTML = '<div class="lz-empty">Noch keine Klausur-Zusammenfassung für ' + lzSelectedFach + '.</div>';
+  } else {
+    kList.innerHTML = kItems.map(item => `
+      <div class="lz-history-item" onclick='lzGoResults(${JSON.stringify(item)})'>
+        <div><span class="lz-h-thema">🎯 ${lzEscapeHtml(item.thema || '(ohne Thema)')}</span><span class="lz-h-date">${item.dateLabel}</span></div>
+        <button class="lz-h-del" onclick="event.stopPropagation();lzDeleteKlausurItem('${item.id}')">✕</button>
+      </div>`).join('');
+  }
+}
+function lzDeleteHistoryItem(id){
+  lzCache.history[lzSelectedFach] = (lzCache.history[lzSelectedFach] || []).filter(i => i.id !== id);
+  lzDbDelete(id);
+  lzRenderFachScreen();
+}
+function lzDeleteKlausurItem(id){
+  lzCache.klausur[lzSelectedFach] = (lzCache.klausur[lzSelectedFach] || []).filter(i => i.id !== id);
+  lzDbDelete(id);
+  lzRenderFachScreen();
+}
+function lzDeleteCurrent(){
+  if(!lzCurrentItem) return;
+  if(!confirm('Diesen Lernzettel wirklich löschen?')) return;
+  if(lzCurrentItem.kind === 'klausur'){
+    lzCache.klausur[lzCurrentItem.fach] = (lzCache.klausur[lzCurrentItem.fach] || []).filter(i => i.id !== lzCurrentItem.id);
+  } else {
+    lzCache.history[lzCurrentItem.fach] = (lzCache.history[lzCurrentItem.fach] || []).filter(i => i.id !== lzCurrentItem.id);
+  }
+  lzDbDelete(lzCurrentItem.id);
+  lzGoBack();
+}
+
+function lzRenderKlausurCheckList(){
+  const all = lzLoadHistory();
+  const items = (all[lzSelectedFach] || []).slice().reverse();
+  const box = document.getElementById('lz-klausurCheckList');
+  if(items.length < 2){
+    box.innerHTML = '<div class="lz-empty">Du brauchst mindestens 2 Lernzettel in diesem Fach für den Klausurmodus.</div>';
+    document.getElementById('lz-klausurBtn').disabled = true;
+    return;
+  }
+  box.innerHTML = items.map(item => `
+    <label class="lz-check-item">
+      <input type="checkbox" class="lz-klausur-check" value="${item.id}" checked onchange="lzUpdateKlausurBtn()">
+      <span><span class="lz-ci-thema">${lzEscapeHtml(item.thema || '(ohne Thema)')}</span><span class="lz-ci-date">${item.dateLabel}</span></span>
+    </label>`).join('');
+  lzUpdateKlausurBtn();
+}
+function lzUpdateKlausurBtn(){
+  const checked = document.querySelectorAll('.lz-klausur-check:checked').length;
+  document.getElementById('lz-klausurBtn').disabled = checked < 2;
+}
+
+const lzFileInput = document.getElementById('lz-fileInput');
+const lzDropzone = document.getElementById('lz-dropzone');
+lzFileInput.addEventListener('change', e => lzHandleFiles(e.target.files));
+lzDropzone.addEventListener('dragover', e => { e.preventDefault(); lzDropzone.classList.add('drag'); });
+lzDropzone.addEventListener('dragleave', () => lzDropzone.classList.remove('drag'));
+lzDropzone.addEventListener('drop', e => { e.preventDefault(); lzDropzone.classList.remove('drag'); lzHandleFiles(e.dataTransfer.files); });
+function lzHandleFiles(fileList){
+  [...fileList].forEach(file => {
+    if(!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = () => { lzUploadedImages.push({ dataUrl: reader.result, mediaType: file.type }); lzRenderThumbs(); };
+    reader.readAsDataURL(file);
+  });
+  lzFileInput.value = '';
+}
+function lzRenderThumbs(){
+  document.getElementById('lz-thumbs').innerHTML = lzUploadedImages.map((img, i) => `
+    <div class="lz-thumb"><img src="${img.dataUrl}"><button class="lz-rm" onclick="lzRemoveImage(${i})">✕</button></div>`).join('');
+}
+function lzRemoveImage(i){ lzUploadedImages.splice(i, 1); lzRenderThumbs(); }
+
+/* Reusable fake progress bar: fills asymptotically toward 90%, cycles status messages, finishes to 100% on stop() */
+function lzStartProgress(wrapId, fillId, statusId, messages){
+  const wrap = document.getElementById(wrapId);
+  const fill = document.getElementById(fillId);
+  const status = document.getElementById(statusId);
+  wrap.classList.remove('lz-hidden');
+  let pct = 0; let msgIdx = 0;
+  status.textContent = messages[0];
+  const tick = setInterval(() => {
+    pct += (90 - pct) * 0.06;
+    fill.style.width = pct + '%';
+  }, 250);
+  const msgTick = setInterval(() => {
+    msgIdx = (msgIdx + 1) % messages.length;
+    status.textContent = messages[msgIdx];
+  }, 2200);
+  return {
+    stop(){
+      clearInterval(tick); clearInterval(msgTick);
+      fill.style.width = '100%';
+      status.textContent = 'Fertig!';
+      setTimeout(() => { wrap.classList.add('lz-hidden'); fill.style.width = '0%'; }, 500);
+    }
+  };
+}
+
+async function lzGenerate(){
+  const errorBox = document.getElementById('lz-errorBox');
+  errorBox.classList.add('lz-hidden');
+  const topic = document.getElementById('lz-topic').value.trim();
+  const notes = document.getElementById('lz-notes').value.trim();
+  if(!topic && !notes && lzUploadedImages.length === 0){
+    errorBox.textContent = 'Bitte gib ein Thema an oder lade Fotos deiner Mitschrift hoch.';
+    errorBox.classList.remove('lz-hidden');
+    return;
+  }
+  const btn = document.getElementById('lz-generateBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="lz-spinner"></span> Lernzettel wird erstellt …';
+  const progress = lzStartProgress('lz-progressWrap', 'lz-progressFill', 'lz-progressStatus', [
+    lzUploadedImages.length > 0 ? 'Lese Fotos …' : 'Sammle Infos …',
+    'Strukturiere Lernzettel …',
+    'Prüfe auf Lücken …',
+    'Erstelle Karteikarten …'
+  ]);
+
+  const promptText = `Du hilfst einem Oberstufenschüler (Gymnasium, Sachsen) beim Erstellen eines Lernzettels.
+
+Fach: ${lzSelectedFach}
+Thema: ${topic || '(kein spezifisches Thema angegeben)'}
+${lzUploadedImages.length > 0 ? 'Im Anhang sind Fotos der handschriftlichen Mitschrift des Schülers. Lies den Inhalt sorgfältig aus den Bildern.' : ''}
+${notes ? 'Zusätzliche Notizen:\n"""\n' + notes + '\n"""' : ''}
+${lzUploadedImages.length === 0 && !notes ? 'Es liegt keine Mitschrift vor — erstelle den Lernzettel aus eigenem Fachwissen zum Thema.' : ''}
+
+Aufgaben:
+1. Erstelle einen klar strukturierten Lernzettel auf Deutsch (Markdown: ## für Abschnitte, **fett** für Kernbegriffe, - für Listen). Nutze primär die Mitschrift (Fotos/Notizen), ergänze fehlende Grundlagen aus deinem Wissen, wo nötig für ein vollständiges Verständnis. Passe Stil und Fachsprache an das Fach "${lzSelectedFach}" an. WICHTIG: Schreibe alle mathematischen Formeln und Symbole in LaTeX-Syntax mit $...$ für Inline-Formeln bzw. $$...$$ für freistehende Formeln (z. B. $x^2 + y^2 = z^2$ oder $$\\\\binom{n}{k}$$). Kein Klartext für Formeln.
+2. Prüfe, ob wichtige Teilaspekte des Themas in der Mitschrift fehlen (typische Prüfungsinhalte, die üblicherweise dazugehören). Liste diese kurz als Stichpunkte auf.
+3. Erstelle 8-12 Karteikarten (Frage/Antwort) zum Abfragen der wichtigsten Inhalte, kurz und prägnant. Auch hier Formeln in $...$ Syntax.
+
+Antworte AUSSCHLIESSLICH mit einem JSON-Objekt, keine Markdown-Codeblöcke, kein Fließtext davor oder danach, exakt in dieser Form:
+{"lernzettel":"## Abschnitt\\ntext...","gaps":["fehlender Aspekt 1"],"flashcards":[{"frage":"...","antwort":"..."}]}
+
+Wenn nichts Wichtiges fehlt, gib ein leeres gaps-Array zurück.`;
+
+  const parts = [{ text: promptText }];
+  lzUploadedImages.forEach(img => {
+    const base64 = img.dataUrl.split(',')[1];
+    parts.push({ inline_data: { mime_type: img.mediaType, data: base64 } });
+  });
+
+  try{
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ contents: [{ parts: parts }] })
+    });
+    if(!response.ok){
+      const errText = await response.text();
+      throw new Error('API-Fehler: ' + response.status + ' — ' + errText.slice(0,200));
+    }
+    const data = await response.json();
+    const rawText = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts
+      ? data.candidates[0].content.parts.map(p => p.text || '').join('')
+      : '';
+    if(!rawText) throw new Error('Keine Textantwort erhalten.');
+    let clean = rawText.trim().replace(/^```json/,'').replace(/^```/,'').replace(/```$/,'').trim();
+    let parsed;
+    try{ parsed = JSON.parse(clean); }
+    catch(e){
+      const match = clean.match(/\{[\s\S]*\}/);
+      if(match) parsed = JSON.parse(match[0]);
+      else throw new Error('Antwort konnte nicht gelesen werden.');
+    }
+    const item = {
+      id: 'lz_' + Date.now(), thema: topic,
+      dateLabel: new Date().toLocaleDateString('de-DE', {day:'2-digit',month:'2-digit',year:'2-digit'}),
+      lernzettel: parsed.lernzettel || '', gaps: parsed.gaps || [], flashcards: parsed.flashcards || [], fach: lzSelectedFach
+    };
+    lzCache.history[lzSelectedFach] = lzCache.history[lzSelectedFach] || [];
+    lzCache.history[lzSelectedFach].push(item);
+    await lzDbInsert(item);
+    lzNavStack = ['dashboard','fach'];
+    lzGoResults(item);
+  }catch(err){
+    console.error(err);
+    errorBox.textContent = 'Etwas ist schiefgelaufen: ' + err.message + ' — versuch es nochmal.';
+    errorBox.classList.remove('lz-hidden');
+  }finally{
+    progress.stop();
+    btn.disabled = false;
+    btn.innerHTML = '<span id="lz-btnLabel">Lernzettel erstellen</span>';
+  }
+}
+
+async function lzGenerateKlausur(){
+  const errorBox = document.getElementById('lz-klausurErrorBox');
+  errorBox.classList.add('lz-hidden');
+  const checked = [...document.querySelectorAll('.lz-klausur-check:checked')].map(c => c.value);
+  const all = lzLoadHistory();
+  const items = (all[lzSelectedFach] || []).filter(i => checked.includes(i.id));
+  if(items.length < 2){
+    errorBox.textContent = 'Bitte wähle mindestens 2 Lernzettel aus.';
+    errorBox.classList.remove('lz-hidden');
+    return;
+  }
+  const btn = document.getElementById('lz-klausurBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="lz-spinner"></span> Wird zusammengefasst …';
+  const progress = lzStartProgress('lz-klausurProgressWrap', 'lz-klausurProgressFill', 'lz-klausurProgressStatus', [
+    'Lese alle Lernzettel …',
+    'Suche Überschneidungen …',
+    'Baue eine gemeinsame Struktur …',
+    'Erstelle neue Karteikarten …'
+  ]);
+
+  const combinedSource = items.map((it,i) => `--- Lernzettel ${i+1}: "${it.thema || 'ohne Thema'}" ---\n${it.lernzettel}`).join('\n\n');
+
+  const promptText = `Du hilfst einem Oberstufenschüler (Gymnasium, Sachsen) bei der Klausurvorbereitung im Fach ${lzSelectedFach}.
+
+Unten stehen ${items.length} einzelne Lernzettel zu verschiedenen Themen. Fasse sie zu EINEM einzigen, klausurtauglichen Lernzettel zusammen: gleiche Inhalte nicht doppelt aufführen, sinnvoll nach Themenblöcken (## Abschnitte) gliedern, roten Faden zwischen den Themen herstellen wo sinnvoll. Formeln weiterhin in LaTeX ($...$ bzw. $$...$$).
+
+${combinedSource}
+
+Aufgaben:
+1. Erstelle den zusammengefassten Lernzettel (Markdown: ## Abschnitte, **fett**, - Listen, LaTeX für Formeln).
+2. Prüfe, ob für eine Klausur zu diesen Themen etwas Wichtiges fehlt, das in keinem der Lernzettel vorkam. Liste das als Stichpunkte.
+3. Erstelle 10-16 Karteikarten (Frage/Antwort), die den gesamten Stoff aller Themen abdecken, ohne Dopplungen.
+
+Antworte AUSSCHLIESSLICH mit einem JSON-Objekt, keine Codeblöcke, kein Fließtext davor/danach:
+{"lernzettel":"## Abschnitt\\ntext...","gaps":["..."],"flashcards":[{"frage":"...","antwort":"..."}]}`;
+
+  try{
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+    });
+    if(!response.ok){
+      const errText = await response.text();
+      throw new Error('API-Fehler: ' + response.status + ' — ' + errText.slice(0,200));
+    }
+    const data = await response.json();
+    const rawText = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts
+      ? data.candidates[0].content.parts.map(p => p.text || '').join('')
+      : '';
+    if(!rawText) throw new Error('Keine Textantwort erhalten.');
+    let clean = rawText.trim().replace(/^```json/,'').replace(/^```/,'').replace(/```$/,'').trim();
+    let parsed;
+    try{ parsed = JSON.parse(clean); }
+    catch(e){
+      const match = clean.match(/\{[\s\S]*\}/);
+      if(match) parsed = JSON.parse(match[0]);
+      else throw new Error('Antwort konnte nicht gelesen werden.');
+    }
+    const combinedTitle = items.map(it => it.thema || 'ohne Thema').join(' + ');
+    const item = {
+      id: 'lzk_' + Date.now(),
+      thema: combinedTitle.length > 80 ? combinedTitle.slice(0,77) + '…' : combinedTitle,
+      dateLabel: new Date().toLocaleDateString('de-DE', {day:'2-digit',month:'2-digit',year:'2-digit'}),
+      lernzettel: parsed.lernzettel || '', gaps: parsed.gaps || [], flashcards: parsed.flashcards || [],
+      fach: lzSelectedFach, kind: 'klausur', sourceThemen: items.map(it => it.thema)
+    };
+    lzCache.klausur[lzSelectedFach] = lzCache.klausur[lzSelectedFach] || [];
+    lzCache.klausur[lzSelectedFach].push(item);
+    await lzDbInsert(item);
+    lzNavStack = ['dashboard','fach'];
+    lzGoResults(item);
+  }catch(err){
+    console.error(err);
+    errorBox.textContent = 'Etwas ist schiefgelaufen: ' + err.message + ' — versuch es nochmal.';
+    errorBox.classList.remove('lz-hidden');
+  }finally{
+    progress.stop();
+    btn.disabled = false;
+    btn.innerHTML = 'Zusammenfassen';
+  }
+}
+
+function lzMdToHtml(md){
+  const lines = md.split('\n'); let html=''; let inList=false;
+  for(let line of lines){
+    line = line.trim();
+    if(!line){ if(inList){html+='</ul>';inList=false;} continue; }
+    if(line.startsWith('## ')){ if(inList){html+='</ul>';inList=false;} html += `<h2>${lzInline(line.slice(3))}</h2>`; }
+    else if(line.startsWith('### ')){ if(inList){html+='</ul>';inList=false;} html += `<h3>${lzInline(line.slice(4))}</h3>`; }
+    else if(line.startsWith('- ')){ if(!inList){html+='<ul>';inList=true;} html += `<li>${lzInline(line.slice(2))}</li>`; }
+    else { if(inList){html+='</ul>';inList=false;} html += `<p>${lzInline(line)}</p>`; }
+  }
+  if(inList) html += '</ul>';
+  return html;
+}
+function lzInline(t){ return t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>'); }
+
+function lzRenderResults(item){
+  const contentEl = document.getElementById('lz-lernzettelContent');
+  contentEl.innerHTML = lzMdToHtml(item.lernzettel);
+  contentEl.classList.remove('lz-hidden');
+  document.getElementById('lz-lernzettelEdit').classList.add('lz-hidden');
+  document.getElementById('lz-editBtn').classList.remove('lz-hidden');
+  lzRenderMath(contentEl);
+  const gapsBox = document.getElementById('lz-gapsBox');
+  const gapsList = document.getElementById('lz-gapsList');
+  if(!item.gaps || item.gaps.length === 0){ gapsBox.classList.add('lz-hidden'); }
+  else{ gapsList.innerHTML = item.gaps.map(g => `<li>${lzEscapeHtml(g)}</li>`).join(''); gapsBox.classList.remove('lz-hidden'); lzRenderMath(gapsList); }
+  lzFlashcards = item.flashcards || [];
+  lzCurrentCard = 0;
+  lzSetCardMode('browse');
+  lzRenderCard();
+}
+
+function lzUpdateHistoryItem(item){
+  const bucket = item.kind === 'klausur' ? lzCache.klausur : lzCache.history;
+  const arr = bucket[item.fach] || [];
+  const idx = arr.findIndex(i => i.id === item.id);
+  if(idx !== -1){ arr[idx] = item; bucket[item.fach] = arr; }
+  lzDbUpdate(item.id, { lernzettel: item.lernzettel });
+}
+function lzToggleEdit(){
+  document.getElementById('lz-lernzettelTextarea').value = lzCurrentItem.lernzettel;
+  document.getElementById('lz-lernzettelContent').classList.add('lz-hidden');
+  document.getElementById('lz-lernzettelEdit').classList.remove('lz-hidden');
+  document.getElementById('lz-editBtn').classList.add('lz-hidden');
+}
+function lzSaveEdit(){
+  lzCurrentItem.lernzettel = document.getElementById('lz-lernzettelTextarea').value;
+  lzUpdateHistoryItem(lzCurrentItem);
+  const contentEl = document.getElementById('lz-lernzettelContent');
+  contentEl.innerHTML = lzMdToHtml(lzCurrentItem.lernzettel);
+  lzRenderMath(contentEl);
+  contentEl.classList.remove('lz-hidden');
+  document.getElementById('lz-lernzettelEdit').classList.add('lz-hidden');
+  document.getElementById('lz-editBtn').classList.remove('lz-hidden');
+}
+function lzCancelEdit(){
+  document.getElementById('lz-lernzettelContent').classList.remove('lz-hidden');
+  document.getElementById('lz-lernzettelEdit').classList.add('lz-hidden');
+  document.getElementById('lz-editBtn').classList.remove('lz-hidden');
+}
+
+function lzSetCardMode(mode){
+  lzCardMode = mode;
+  document.getElementById('lz-modeBrowseBtn').classList.toggle('active', mode==='browse');
+  document.getElementById('lz-modeQuizBtn').classList.toggle('active', mode==='quiz');
+  document.getElementById('lz-browseMode').classList.toggle('lz-hidden', mode!=='browse');
+  document.getElementById('lz-quizMode').classList.toggle('lz-hidden', mode!=='quiz');
+  if(mode==='quiz') lzStartQuiz();
+}
+function lzRenderCard(){
+  if(lzFlashcards.length === 0){
+    document.getElementById('lz-cardFront').textContent = 'Keine Karteikarten erstellt.';
+    document.getElementById('lz-cardBack').textContent = '';
+    document.getElementById('lz-deckCount').textContent = '0 / 0';
+    return;
+  }
+  const card = document.getElementById('lz-flashcard');
+  card.classList.remove('flipped');
+  const c = lzFlashcards[lzCurrentCard];
+  const frontEl = document.getElementById('lz-cardFront'); frontEl.textContent = c.frage;
+  const backEl = document.getElementById('lz-cardBack'); backEl.textContent = c.antwort;
+  lzRenderMath(frontEl); lzRenderMath(backEl);
+  document.getElementById('lz-deckCount').textContent = `${lzCurrentCard+1} / ${lzFlashcards.length}`;
+  document.getElementById('lz-prevBtn').disabled = lzCurrentCard === 0;
+  document.getElementById('lz-nextBtn').disabled = lzCurrentCard === lzFlashcards.length - 1;
+}
+function lzFlipCard(){ document.getElementById('lz-flashcard').classList.toggle('flipped'); }
+function lzNextCard(){ if(lzCurrentCard < lzFlashcards.length - 1){ lzCurrentCard++; lzRenderCard(); } }
+function lzPrevCard(){ if(lzCurrentCard > 0){ lzCurrentCard--; lzRenderCard(); } }
+function lzShuffleCards(){
+  for(let i = lzFlashcards.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i+1)); [lzFlashcards[i], lzFlashcards[j]] = [lzFlashcards[j], lzFlashcards[i]]; }
+  lzCurrentCard = 0; lzRenderCard();
+}
+
+function lzStartQuiz(){
+  const shuffled = [...lzFlashcards];
+  for(let i = shuffled.length - 1; i > 0; i--){ const j = Math.floor(Math.random()*(i+1)); [shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]; }
+  lzQuiz = { queue: shuffled, index:0, correct:0, incorrect:0, wrongCards:[], revealed:false };
+  document.getElementById('lz-quizActive').classList.remove('lz-hidden');
+  document.getElementById('lz-quizDone').classList.add('lz-hidden');
+  lzRenderQuiz();
+}
+function lzRenderQuiz(){
+  if(!lzQuiz || lzQuiz.queue.length === 0){
+    document.getElementById('lz-quizFront').textContent = 'Keine Karteikarten vorhanden.';
+    return;
+  }
+  if(lzQuiz.index >= lzQuiz.queue.length){ lzFinishQuiz(); return; }
+  const c = lzQuiz.queue[lzQuiz.index];
+  const frontEl = document.getElementById('lz-quizFront'); frontEl.textContent = c.frage;
+  const backEl = document.getElementById('lz-quizBack'); backEl.textContent = c.antwort;
+  lzRenderMath(frontEl); lzRenderMath(backEl);
+  document.getElementById('lz-quizCard').classList.remove('flipped');
+  lzQuiz.revealed = false;
+  document.getElementById('lz-quizTapHint').textContent = 'Zum Zeigen der Antwort tippen';
+  document.getElementById('lz-quizProgress').textContent = `Karte ${lzQuiz.index+1} / ${lzQuiz.queue.length} · ${lzQuiz.correct} richtig`;
+  document.getElementById('lz-quizActions').innerHTML = '';
+}
+function lzQuizReveal(){
+  if(!lzQuiz || lzQuiz.revealed) return;
+  lzQuiz.revealed = true;
+  document.getElementById('lz-quizCard').classList.add('flipped');
+  document.getElementById('lz-quizActions').innerHTML = `
+    <button class="lz-btn-wrong" onclick="lzQuizMark(false)">✗ Falsch</button>
+    <button class="lz-btn-correct" onclick="lzQuizMark(true)">✓ Richtig</button>`;
+}
+function lzQuizMark(isCorrect){
+  const c = lzQuiz.queue[lzQuiz.index];
+  if(isCorrect) lzQuiz.correct++; else { lzQuiz.incorrect++; lzQuiz.wrongCards.push(c); }
+  lzQuiz.index++;
+  lzRenderQuiz();
+}
+function lzFinishQuiz(){
+  document.getElementById('lz-quizActive').classList.add('lz-hidden');
+  const done = document.getElementById('lz-quizDone');
+  done.classList.remove('lz-hidden');
+  const total = lzQuiz.correct + lzQuiz.incorrect;
+  done.innerHTML = `
+    <div class="lz-quiz-score">${lzQuiz.correct} / ${total}</div>
+    <div class="lz-quiz-score-lbl">richtig beantwortet</div>
+    <div class="lz-actions-row">
+      ${lzQuiz.wrongCards.length > 0 ? `<button class="lz-new-btn" onclick="lzRetryWrong()">Falsche nochmal (${lzQuiz.wrongCards.length})</button>` : ''}
+      <button class="lz-btn-ghost" onclick="lzStartQuiz()">Neu mischen</button>
+    </div>`;
+}
+function lzRetryWrong(){ lzFlashcards = lzQuiz.wrongCards; lzStartQuiz(); }
+
+function lzStripMath(t){ return t.replace(/\$\$?/g, ''); }
+function lzExportPDF(){
+  if(!lzCurrentItem || !window.jspdf){ alert('PDF-Export gerade nicht verfügbar.'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'pt', format:'a4'});
+  const margin = 48; const width = 595 - margin*2; let y = 60;
+  doc.setFont('helvetica','bold'); doc.setFontSize(18);
+  doc.text(`${lzCurrentItem.fach} — ${lzCurrentItem.thema || 'Lernzettel'}`, margin, y);
+  y += 28;
+  doc.setDrawColor(200); doc.line(margin, y, margin+width, y); y += 20;
+  const lines = lzCurrentItem.lernzettel.split('\n');
+  lines.forEach(raw => {
+    const line = raw.trim();
+    if(!line) return;
+    if(y > 780){ doc.addPage(); y = 60; }
+    if(line.startsWith('## ')){
+      doc.setFont('helvetica','bold'); doc.setFontSize(14);
+      const txt = lzStripMath(line.slice(3).replace(/\*\*/g,''));
+      y += 6; doc.text(txt, margin, y); y += 18;
+    } else if(line.startsWith('### ')){
+      doc.setFont('helvetica','bold'); doc.setFontSize(12);
+      const txt = lzStripMath(line.slice(4).replace(/\*\*/g,''));
+      doc.text(txt, margin, y); y += 16;
+    } else {
+      doc.setFont('helvetica','normal'); doc.setFontSize(11);
+      const prefix = line.startsWith('- ') ? '• ' : '';
+      const txt = lzStripMath(prefix + line.replace(/^- /,'').replace(/\*\*(.+?)\*\*/g,'$1'));
+      const wrapped = doc.splitTextToSize(txt, width - (prefix?10:0));
+      wrapped.forEach(w => { if(y > 780){ doc.addPage(); y = 60; } doc.text(w, margin + (prefix?10:0), y); y += 15; });
+    }
+  });
+  if(lzCurrentItem.flashcards && lzCurrentItem.flashcards.length){
+    y += 10;
+    if(y > 760){ doc.addPage(); y = 60; }
+    doc.setFont('helvetica','bold'); doc.setFontSize(14);
+    doc.text('Karteikarten', margin, y); y += 20;
+    lzCurrentItem.flashcards.forEach((c,i) => {
+      if(y > 770){ doc.addPage(); y = 60; }
+      doc.setFont('helvetica','bold'); doc.setFontSize(11);
+      const q = doc.splitTextToSize(`${i+1}. ${lzStripMath(c.frage)}`, width);
+      q.forEach(w => { doc.text(w, margin, y); y += 14; });
+      doc.setFont('helvetica','normal');
+      const a = doc.splitTextToSize(lzStripMath(c.antwort), width - 14);
+      a.forEach(w => { if(y > 780){ doc.addPage(); y = 60; } doc.text(w, margin+14, y); y += 14; });
+      y += 8;
+    });
+  }
+  doc.save(`Lernzettel_${lzCurrentItem.fach}_${(lzCurrentItem.thema||'ohne_thema').replace(/[^a-zA-Z0-9äöüÄÖÜß]+/g,'_')}.pdf`);
+}
+function lzExportWord(){
+  if(!lzCurrentItem) return;
+  const bodyHtml = lzMdToHtml(lzStripMath(lzCurrentItem.lernzettel));
+  let cardsHtml = '';
+  if(lzCurrentItem.flashcards && lzCurrentItem.flashcards.length){
+    cardsHtml = '<h2>Karteikarten</h2><table border="1" cellpadding="6" style="border-collapse:collapse;width:100%;"><tr><th>Frage</th><th>Antwort</th></tr>' +
+      lzCurrentItem.flashcards.map(c => `<tr><td>${lzEscapeHtml(lzStripMath(c.frage))}</td><td>${lzEscapeHtml(lzStripMath(c.antwort))}</td></tr>`).join('') + '</table>';
+  }
+  const gapsHtml = (lzCurrentItem.gaps && lzCurrentItem.gaps.length)
+    ? '<h2>Möglicherweise fehlt noch</h2><ul>' + lzCurrentItem.gaps.map(g=>`<li>${lzEscapeHtml(g)}</li>`).join('') + '</ul>'
+    : '';
+  const html = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+  <head><meta charset='utf-8'><title>Lernzettel</title></head>
+  <body style="font-family:Calibri,Arial,sans-serif;">
+    <h1>${lzEscapeHtml(lzCurrentItem.fach)} — ${lzEscapeHtml(lzCurrentItem.thema || 'Lernzettel')}</h1>
+    ${bodyHtml}
+    ${gapsHtml}
+    ${cardsHtml}
+  </body></html>`;
+  const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Lernzettel_${lzCurrentItem.fach}_${(lzCurrentItem.thema||'ohne_thema').replace(/[^a-zA-Z0-9äöüÄÖÜß]+/g,'_')}.doc`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+if(localStorage.getItem('lz_unlocked') === 'true'){ lzBoot(); }
+</script>
+</body>
+</html>
