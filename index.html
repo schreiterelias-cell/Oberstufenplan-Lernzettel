@@ -318,6 +318,12 @@
   .lz-check-item .lz-ci-thema { font-size:0.875rem; font-weight:500; }
   .lz-check-item .lz-ci-date { font-family:'JetBrains Mono', monospace; font-size:0.7rem; color:var(--muted); margin-left:0.5rem; }
   .lz-klausur-hint { font-size:0.78rem; color:var(--muted); margin-bottom:1rem; }
+
+  /* VOKABELTRAINER */
+  .vk-row { display:flex; gap:0.5rem; margin-bottom:0.5rem; align-items:center; }
+  .vk-row input { flex:1; }
+  .vk-row-rm { background:none; border:none; color:var(--muted); font-size:1rem; cursor:pointer; padding:0.3rem 0.5rem; flex-shrink:0; }
+  .vk-row-rm:hover { color:var(--vollgas); }
 </style>
 </head>
 <body>
@@ -350,6 +356,7 @@
     <div class="tab" onclick="showTab('notfall')">🚨 Was-wenn-Plan</div>
     <div class="tab" onclick="showTab('deutsch')">⚠️ Deutsch-Guide</div>
     <div class="tab" onclick="showTab('lernzettel')">📝 Lernzettel</div>
+    <div class="tab" onclick="showTab('vokabeln')">🔤 Vokabeltrainer</div>
   </div>
 
   <!-- TAB: PLAN -->
@@ -1209,10 +1216,32 @@
       </div>
       <button class="lz-new-btn" onclick="lzGoCreate()">+ Neuer Lernzettel</button>
       <button class="lz-klausur-btn" onclick="lzGoKlausur()">🎯 Klausurmodus</button>
+      <button class="lz-klausur-btn lz-hidden" id="lz-formelnBtn" onclick="lzGoFormeln()">📐 Formelsammlung</button>
       <div class="lz-history-list" id="lz-historyList"></div>
 
       <div class="lz-klausur-section-title">🎯 Klausur-Zusammenfassungen</div>
       <div class="lz-history-list" id="lz-klausurList"></div>
+    </div>
+
+    <!-- FORMELSAMMLUNG SCREEN -->
+    <div id="lz-screen-formeln" class="lz-hidden">
+      <div class="lz-subnav">
+        <button class="lz-back" onclick="lzGoBack()">‹</button>
+        <div>
+          <div class="lz-subnav-sub" id="lz-formelnSub"></div>
+          <div class="lz-subnav-title">📐 Formelsammlung</div>
+        </div>
+      </div>
+      <div class="lz-card">
+        <button class="lz-new-btn" id="lz-formelnBtnGen" onclick="lzGenerateFormeln()">Aktualisieren</button>
+        <span class="lz-hint" id="lz-formelnUpdated" style="margin-left:0.8rem;"></span>
+        <div class="lz-progress-wrap lz-hidden" id="lz-formelnProgressWrap">
+          <div class="lz-progress-track"><div class="lz-progress-fill" id="lz-formelnProgressFill"></div></div>
+          <div class="lz-progress-status" id="lz-formelnProgressStatus">Startet …</div>
+        </div>
+        <div id="lz-formelnErrorBox" class="lz-error lz-hidden"></div>
+        <div class="lz-content" id="lz-formelnContent" style="margin-top:1.25rem;"></div>
+      </div>
     </div>
 
     <!-- KLAUSURMODUS SELECTION SCREEN -->
@@ -1350,6 +1379,138 @@
             <div class="lz-quiz-actions" id="lz-quizActions"></div>
           </div>
           <div id="lz-quizDone" class="lz-quiz-summary lz-hidden"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TAB: VOKABELTRAINER -->
+  <div class="tab-content" id="tab-vokabeln">
+
+    <!-- LOCK (shares unlock state with Lernzettel) -->
+    <div id="vk-screen-lock">
+      <div class="lz-card" style="max-width:380px;margin:2rem auto;text-align:center;">
+        <div style="font-size:1.8rem;margin-bottom:0.5rem;">🔒</div>
+        <div class="lz-subnav-title" style="margin-bottom:1rem;">Vokabeltrainer gesperrt</div>
+        <input type="password" class="lz-input" id="vk-passwordInput" placeholder="Passwort" style="text-align:center;" onkeydown="if(event.key==='Enter') vkUnlock()">
+        <div style="margin-top:1rem;"><button class="lz-new-btn" onclick="vkUnlock()">Entsperren</button></div>
+        <div id="vk-lockError" class="lz-error lz-hidden" style="margin-top:1rem;">Falsches Passwort.</div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="vk-screen-dashboard" class="lz-hidden">
+      <div class="lz-intro">Vokabelsets für Englisch & Französisch — Wörter eintippen oder Foto der Vokabelliste hochladen, dann per Karteikarten/Quiz üben.</div>
+      <div class="lz-fach-grid" id="vk-fachGrid"></div>
+    </div>
+
+    <!-- FACH SCREEN -->
+    <div id="vk-screen-fach" class="lz-hidden">
+      <div class="lz-subnav">
+        <button class="lz-back" onclick="vkGoDashboard()">‹</button>
+        <div><div class="lz-subnav-sub">Fach</div><div class="lz-subnav-title" id="vk-fachTitle"></div></div>
+      </div>
+      <button class="lz-new-btn" onclick="vkGoCreate()">+ Neues Vokabelset</button>
+      <div class="lz-history-list" id="vk-historyList"></div>
+    </div>
+
+    <!-- CREATE SCREEN -->
+    <div id="vk-screen-create" class="lz-hidden">
+      <div class="lz-subnav">
+        <button class="lz-back" onclick="vkGoBack()">‹</button>
+        <div><div class="lz-subnav-sub" id="vk-createSub"></div><div class="lz-subnav-title">Neues Vokabelset</div></div>
+      </div>
+      <div class="lz-card">
+        <label class="lz-label">Titel (z. B. "Unit 5" oder "Kapitel 3")</label>
+        <input type="text" class="lz-input" id="vk-topic" placeholder="z. B. Unit 5 — Travel">
+
+        <label class="lz-label">Foto einer Vokabelliste (optional)</label>
+        <div class="lz-dropzone" id="vk-dropzone" onclick="document.getElementById('vk-fileInput').click()">
+          <div class="lz-dz-icon">📷</div>
+          <div class="lz-dz-text"><strong>Fotos hochladen</strong> oder hier reinziehen</div>
+        </div>
+        <input type="file" id="vk-fileInput" accept="image/*" multiple style="display:none">
+        <div class="lz-thumbs" id="vk-thumbs"></div>
+        <div class="lz-hint">Die KI liest Wort-Übersetzungs-Paare direkt aus dem Foto.</div>
+
+        <label class="lz-label">Oder manuell eintippen</label>
+        <div id="vk-manualRows"></div>
+        <button class="lz-btn-ghost" onclick="vkAddRow()" style="margin-top:0.5rem;">+ Zeile</button>
+
+        <div style="margin-top:1.25rem;">
+          <button class="lz-new-btn" id="vk-generateBtn" onclick="vkGenerate()"><span id="vk-btnLabel">Vokabelset erstellen</span></button>
+          <div class="lz-progress-wrap lz-hidden" id="vk-progressWrap">
+            <div class="lz-progress-track"><div class="lz-progress-fill" id="vk-progressFill"></div></div>
+            <div class="lz-progress-status" id="vk-progressStatus">Startet …</div>
+          </div>
+        </div>
+        <div id="vk-errorBox" class="lz-error lz-hidden"></div>
+      </div>
+    </div>
+
+    <!-- RESULTS SCREEN -->
+    <div id="vk-screen-results" class="lz-hidden">
+      <div class="lz-subnav">
+        <button class="lz-back" onclick="vkGoBack()">‹</button>
+        <div><div class="lz-subnav-sub" id="vk-resultsSub"></div><div class="lz-subnav-title" id="vk-resultsTitle"></div></div>
+      </div>
+      <div class="lz-export-row">
+        <button class="lz-btn-ghost" onclick="vkToggleEdit()">✎ Bearbeiten</button>
+        <button class="lz-btn-ghost danger" onclick="vkDeleteCurrent()">🗑 Löschen</button>
+      </div>
+
+      <div class="lz-card lz-hidden" id="vk-editCard">
+        <div id="vk-editRows"></div>
+        <button class="lz-btn-ghost" onclick="vkAddEditRow()" style="margin-top:0.5rem;">+ Zeile</button>
+        <div style="margin-top:1rem; display:flex; gap:0.6rem;">
+          <button class="lz-new-btn" onclick="vkSaveEdit()">Speichern</button>
+          <button class="lz-btn-ghost" onclick="vkCancelEdit()">Abbrechen</button>
+        </div>
+      </div>
+
+      <div class="lz-card">
+        <div class="lz-deck-meta">
+          <div class="lz-label" style="margin:0;">Karteikarten</div>
+          <div class="lz-deck-count" id="vk-deckCount">1 / 1</div>
+        </div>
+        <div class="lz-mode-toggle">
+          <button class="lz-mode-btn active" id="vk-modeBrowseBtn" onclick="vkSetCardMode('browse')">Durchklicken</button>
+          <button class="lz-mode-btn" id="vk-modeQuizBtn" onclick="vkSetCardMode('quiz')">Quiz</button>
+        </div>
+
+        <div id="vk-browseMode">
+          <div class="lz-card-stage">
+            <div class="lz-flip" id="vk-flashcard" onclick="vkFlipCard()">
+              <div class="lz-flip-inner">
+                <div class="lz-face lz-face-front"><span id="vk-cardFront"></span></div>
+                <div class="lz-face lz-face-back"><span id="vk-cardBack"></span></div>
+              </div>
+              <div class="lz-tap-hint">Zum Umdrehen tippen</div>
+            </div>
+          </div>
+          <div class="lz-deck-nav">
+            <button class="lz-nav-btn" id="vk-prevBtn" onclick="vkPrevCard()">‹</button>
+            <button class="lz-nav-btn" onclick="vkShuffleCards()" title="Mischen">⟲</button>
+            <button class="lz-nav-btn" id="vk-nextBtn" onclick="vkNextCard()">›</button>
+          </div>
+        </div>
+
+        <div id="vk-quizMode" class="lz-hidden">
+          <div id="vk-quizActive">
+            <div class="lz-quiz-progress" id="vk-quizProgress"></div>
+            <div class="lz-card-stage">
+              <div class="lz-flip" id="vk-quizCard" onclick="vkQuizReveal()">
+                <div class="lz-flip-inner">
+                  <div class="lz-face lz-face-front"><span id="vk-quizFront"></span></div>
+                  <div class="lz-face lz-face-back"><span id="vk-quizBack"></span></div>
+                </div>
+                <div class="lz-tap-hint" id="vk-quizTapHint">Zum Zeigen der Antwort tippen</div>
+              </div>
+            </div>
+            <div class="lz-quiz-actions" id="vk-quizActions"></div>
+          </div>
+          <div id="vk-quizDone" class="lz-quiz-summary lz-hidden"></div>
         </div>
       </div>
     </div>
@@ -1497,6 +1658,7 @@ function lzUnlock(){
   err.classList.add('lz-hidden');
   localStorage.setItem('lz_unlocked', 'true');
   lzBoot();
+  vkBoot();
 }
 async function lzBoot(){
   document.getElementById('lz-screen-lock').classList.add('lz-hidden');
@@ -1508,19 +1670,21 @@ async function lzSyncFromSupabase(){
   const status = document.getElementById('lz-syncStatus');
   if(!sb){
     if(status) status.textContent = 'Supabase nicht konfiguriert — Daten werden nur lokal gespeichert.';
-    lzCache = { history: JSON.parse(localStorage.getItem(lzStoreKey())) || {}, klausur: JSON.parse(localStorage.getItem(lzKlausurStoreKey())) || {} };
+    lzCache = { history: JSON.parse(localStorage.getItem(lzStoreKey())) || {}, klausur: JSON.parse(localStorage.getItem(lzKlausurStoreKey())) || {}, formeln: {} };
     return;
   }
   try{
     const { data, error } = await sb.from('lernzettel').select('*').order('created_at', { ascending: true });
     if(error) throw error;
-    lzCache = { history: {}, klausur: {} };
+    lzCache = { history: {}, klausur: {}, formeln: {} };
     (data || []).forEach(row => {
       const item = {
         id: row.id, thema: row.thema, dateLabel: row.date_label, lernzettel: row.lernzettel,
         gaps: row.gaps || [], flashcards: row.flashcards || [], fach: row.fach,
-        kind: row.kind === 'klausur' ? 'klausur' : undefined, sourceThemen: row.source_themen || []
+        kind: row.kind === 'klausur' ? 'klausur' : (row.kind === 'formelsammlung' ? 'formelsammlung' : undefined),
+        sourceThemen: row.source_themen || []
       };
+      if(row.kind === 'formelsammlung'){ lzCache.formeln[row.fach] = item; return; }
       const bucket = row.kind === 'klausur' ? lzCache.klausur : lzCache.history;
       bucket[row.fach] = bucket[row.fach] || [];
       bucket[row.fach].push(item);
@@ -1539,6 +1703,16 @@ async function lzDbInsert(item){
       kind: item.kind || 'normal', source_themen: item.sourceThemen || []
     });
   }catch(e){ console.error('Supabase insert fehlgeschlagen', e); }
+}
+async function lzDbUpsert(item){
+  if(!sb) return;
+  try{
+    await sb.from('lernzettel').upsert({
+      id: item.id, fach: item.fach, thema: item.thema, date_label: item.dateLabel,
+      lernzettel: item.lernzettel, gaps: item.gaps || [], flashcards: item.flashcards || [],
+      kind: item.kind || 'normal', source_themen: item.sourceThemen || []
+    });
+  }catch(e){ console.error('Supabase upsert fehlgeschlagen', e); }
 }
 async function lzDbUpdate(id, fields){
   if(!sb) return;
@@ -1570,7 +1744,7 @@ function lzRenderMath(el){ if(window.renderMathInElement){ renderMathInElement(e
 function lzKlausurStoreKey(){ return 'lernzettel_klausur_v1'; }
 
 function lzShowScreen(id){
-  ['dashboard','fach','create','results','klausur'].forEach(s => document.getElementById('lz-screen-'+s).classList.add('lz-hidden'));
+  ['dashboard','fach','create','results','klausur','formeln'].forEach(s => document.getElementById('lz-screen-'+s).classList.add('lz-hidden'));
   document.getElementById('lz-screen-'+id).classList.remove('lz-hidden');
 }
 function lzGoDashboard(){ lzNavStack = []; lzRenderDashboard(); lzShowScreen('dashboard'); }
@@ -1578,8 +1752,16 @@ function lzGoFach(name){
   lzSelectedFach = name;
   lzNavStack = ['dashboard'];
   document.getElementById('lz-fachTitle').textContent = name;
+  document.getElementById('lz-formelnBtn').classList.toggle('lz-hidden', name !== 'Mathematik' && name !== 'Physik');
   lzRenderFachScreen();
   lzShowScreen('fach');
+}
+function lzGoFormeln(){
+  lzNavStack.push('fach');
+  document.getElementById('lz-formelnSub').textContent = lzSelectedFach;
+  document.getElementById('lz-formelnErrorBox').classList.add('lz-hidden');
+  lzRenderFormelnScreen();
+  lzShowScreen('formeln');
 }
 function lzGoCreate(){
   lzNavStack.push('fach');
@@ -1693,6 +1875,85 @@ function lzRenderKlausurCheckList(){
 function lzUpdateKlausurBtn(){
   const checked = document.querySelectorAll('.lz-klausur-check:checked').length;
   document.getElementById('lz-klausurBtn').disabled = checked < 2;
+}
+
+function lzRenderFormelnScreen(){
+  const item = lzCache.formeln[lzSelectedFach];
+  const contentEl = document.getElementById('lz-formelnContent');
+  const updatedEl = document.getElementById('lz-formelnUpdated');
+  if(!item){
+    contentEl.innerHTML = '<div class="lz-empty">Noch keine Formelsammlung — klick oben auf "Aktualisieren".</div>';
+    updatedEl.textContent = '';
+    return;
+  }
+  contentEl.innerHTML = lzMdToHtml(item.lernzettel);
+  lzRenderMath(contentEl);
+  updatedEl.textContent = 'Zuletzt aktualisiert: ' + item.dateLabel;
+}
+
+async function lzGenerateFormeln(){
+  const errorBox = document.getElementById('lz-formelnErrorBox');
+  errorBox.classList.add('lz-hidden');
+  const normalItems = lzCache.history[lzSelectedFach] || [];
+  const klausurItems = lzCache.klausur[lzSelectedFach] || [];
+  const allItems = [...normalItems, ...klausurItems];
+  if(allItems.length === 0){
+    errorBox.textContent = 'Es gibt noch keine Lernzettel in ' + lzSelectedFach + ', aus denen Formeln gesammelt werden könnten.';
+    errorBox.classList.remove('lz-hidden');
+    return;
+  }
+  const btn = document.getElementById('lz-formelnBtnGen');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="lz-spinner"></span> Wird aktualisiert …';
+  const progress = lzStartProgress('lz-formelnProgressWrap', 'lz-formelnProgressFill', 'lz-formelnProgressStatus', [
+    'Durchsuche alle Lernzettel …',
+    'Extrahiere Formeln …',
+    'Sortiere nach Thema …'
+  ]);
+
+  const combinedSource = allItems.map((it,i) => `--- "${it.thema || 'ohne Thema'}" ---\n${it.lernzettel}`).join('\n\n');
+  const promptText = `Du hilfst einem Oberstufenschüler im Fach ${lzSelectedFach} beim Erstellen einer Formelsammlung.
+
+Unten stehen alle bisherigen Lernzettel dieses Fachs. Durchsuche sie nach allen mathematischen/physikalischen Formeln (LaTeX, $...$ bzw. $$...$$) und stelle eine übersichtliche, nach Themen gruppierte Formelsammlung zusammen. Keine Dopplungen. Zu jeder Formel maximal ein kurzer Stichpunkt, wofür sie steht — keine langen Erklärungen, das ist eine reine Referenz zum Nachschlagen, kein Lernzettel.
+
+${combinedSource}
+
+Antworte NUR mit Markdown (## Themenblöcke, - Formel: Bedeutung), keine Code-Blöcke, kein Fließtext davor/danach. Formeln immer in $...$ bzw. $$...$$.`;
+
+  try{
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+    });
+    if(!response.ok){
+      const errText = await response.text();
+      throw new Error('API-Fehler: ' + response.status + ' — ' + errText.slice(0,200));
+    }
+    const data = await response.json();
+    const rawText = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts
+      ? data.candidates[0].content.parts.map(p => p.text || '').join('')
+      : '';
+    if(!rawText) throw new Error('Keine Textantwort erhalten.');
+    const clean = rawText.trim().replace(/^```(markdown|md)?/,'').replace(/```$/,'').trim();
+
+    const item = {
+      id: 'formelsammlung_' + lzSelectedFach, thema: 'Formelsammlung',
+      dateLabel: new Date().toLocaleDateString('de-DE', {day:'2-digit',month:'2-digit',year:'2-digit'}),
+      lernzettel: clean, gaps: [], flashcards: [], fach: lzSelectedFach, kind: 'formelsammlung'
+    };
+    lzCache.formeln[lzSelectedFach] = item;
+    await lzDbUpsert(item);
+    lzRenderFormelnScreen();
+  }catch(err){
+    console.error(err);
+    errorBox.textContent = 'Etwas ist schiefgelaufen: ' + err.message + ' — versuch es nochmal.';
+    errorBox.classList.remove('lz-hidden');
+  }finally{
+    progress.stop();
+    btn.disabled = false;
+    btn.innerHTML = 'Aktualisieren';
+  }
 }
 
 const lzFileInput = document.getElementById('lz-fileInput');
@@ -2138,7 +2399,360 @@ function lzExportWord(){
   URL.revokeObjectURL(url);
 }
 
-if(localStorage.getItem('lz_unlocked') === 'true'){ lzBoot(); }
+/* ===================== VOKABELTRAINER ===================== */
+const VK_FAECHER = ['Englisch', 'Französisch'];
+let vkCache = { sets: {} };
+let vkSelectedFach = null;
+let vkUploadedImages = [];
+let vkFlashcards = [];
+let vkCurrentCard = 0;
+let vkCurrentItem = null;
+let vkCardMode = 'browse';
+let vkQuiz = null;
+let vkNavStack = [];
+
+function vkUnlock(){
+  const val = document.getElementById('vk-passwordInput').value;
+  const err = document.getElementById('vk-lockError');
+  if(val !== LZ_PASSWORD){ err.classList.remove('lz-hidden'); return; }
+  err.classList.add('lz-hidden');
+  localStorage.setItem('lz_unlocked', 'true');
+  vkBoot();
+  lzBoot();
+}
+async function vkBoot(){
+  document.getElementById('vk-screen-lock').classList.add('lz-hidden');
+  document.getElementById('vk-screen-dashboard').classList.remove('lz-hidden');
+  await vkSyncFromSupabase();
+  vkRenderDashboard();
+}
+async function vkSyncFromSupabase(){
+  if(!sb){ vkCache = { sets: {} }; return; }
+  try{
+    const { data, error } = await sb.from('vokabelsets').select('*').order('created_at', { ascending: true });
+    if(error) throw error;
+    vkCache = { sets: {} };
+    (data || []).forEach(row => {
+      const item = { id: row.id, fach: row.fach, thema: row.thema, dateLabel: row.date_label, pairs: row.pairs || [] };
+      vkCache.sets[row.fach] = vkCache.sets[row.fach] || [];
+      vkCache.sets[row.fach].push(item);
+    });
+  }catch(e){ console.error('Vokabel-Sync fehlgeschlagen', e); }
+}
+async function vkDbInsert(item){
+  if(!sb) return;
+  try{ await sb.from('vokabelsets').insert({ id: item.id, fach: item.fach, thema: item.thema, date_label: item.dateLabel, pairs: item.pairs }); }
+  catch(e){ console.error('Vokabel insert fehlgeschlagen', e); }
+}
+async function vkDbUpdate(id, fields){
+  if(!sb) return;
+  try{ await sb.from('vokabelsets').update(fields).eq('id', id); }
+  catch(e){ console.error('Vokabel update fehlgeschlagen', e); }
+}
+async function vkDbDelete(id){
+  if(!sb) return;
+  try{ await sb.from('vokabelsets').delete().eq('id', id); }
+  catch(e){ console.error('Vokabel delete fehlgeschlagen', e); }
+}
+
+function vkShowScreen(id){
+  ['dashboard','fach','create','results'].forEach(s => document.getElementById('vk-screen-'+s).classList.add('lz-hidden'));
+  document.getElementById('vk-screen-'+id).classList.remove('lz-hidden');
+}
+function vkGoDashboard(){ vkNavStack = []; vkRenderDashboard(); vkShowScreen('dashboard'); }
+function vkGoFach(name){
+  vkSelectedFach = name;
+  vkNavStack = ['dashboard'];
+  document.getElementById('vk-fachTitle').textContent = name;
+  vkRenderFachScreen();
+  vkShowScreen('fach');
+}
+function vkGoCreate(){
+  vkNavStack.push('fach');
+  vkUploadedImages = []; vkRenderThumbs();
+  document.getElementById('vk-topic').value = '';
+  document.getElementById('vk-errorBox').classList.add('lz-hidden');
+  document.getElementById('vk-createSub').textContent = vkSelectedFach;
+  document.getElementById('vk-manualRows').innerHTML = '';
+  for(let i=0;i<4;i++) vkAddRow();
+  vkShowScreen('create');
+}
+function vkGoResults(item){
+  vkNavStack.push('fach');
+  vkCurrentItem = item;
+  document.getElementById('vk-resultsTitle').textContent = item.thema || '(ohne Titel)';
+  document.getElementById('vk-resultsSub').textContent = item.fach;
+  vkRenderResults(item);
+  vkShowScreen('results');
+}
+function vkGoBack(){
+  const prev = vkNavStack.pop();
+  if(prev === 'fach'){ document.getElementById('vk-fachTitle').textContent = vkSelectedFach; vkRenderFachScreen(); vkShowScreen('fach'); }
+  else vkGoDashboard();
+}
+
+function vkRenderDashboard(){
+  const grid = document.getElementById('vk-fachGrid');
+  grid.innerHTML = VK_FAECHER.map(f => {
+    const count = (vkCache.sets[f] || []).length;
+    return `<div class="lz-fach-card" onclick="vkGoFach('${f}')">
+      <div class="lz-fach-top"><div class="lz-fach-name">${f}</div></div>
+      <div class="lz-fach-count">${count === 0 ? 'Noch keine Vokabelsets' : count + ' Vokabelset(s)'}</div>
+    </div>`;
+  }).join('');
+}
+function vkRenderFachScreen(){
+  const items = (vkCache.sets[vkSelectedFach] || []).slice().reverse();
+  const list = document.getElementById('vk-historyList');
+  if(items.length === 0){
+    list.innerHTML = '<div class="lz-empty">Noch keine Vokabelsets für ' + vkSelectedFach + '.<br>Leg oben direkt los.</div>';
+    return;
+  }
+  list.innerHTML = items.map(item => `
+    <div class="lz-history-item" onclick='vkGoResults(${JSON.stringify(item)})'>
+      <div><span class="lz-h-thema">${lzEscapeHtml(item.thema || '(ohne Titel)')}</span><span class="lz-h-date">${item.dateLabel} · ${item.pairs.length} Wörter</span></div>
+      <button class="lz-h-del" onclick="event.stopPropagation();vkDeleteHistoryItem('${item.id}')">✕</button>
+    </div>`).join('');
+}
+function vkDeleteHistoryItem(id){
+  vkCache.sets[vkSelectedFach] = (vkCache.sets[vkSelectedFach] || []).filter(i => i.id !== id);
+  vkDbDelete(id);
+  vkRenderFachScreen();
+}
+function vkDeleteCurrent(){
+  if(!vkCurrentItem) return;
+  if(!confirm('Dieses Vokabelset wirklich löschen?')) return;
+  vkCache.sets[vkCurrentItem.fach] = (vkCache.sets[vkCurrentItem.fach] || []).filter(i => i.id !== vkCurrentItem.id);
+  vkDbDelete(vkCurrentItem.id);
+  vkGoBack();
+}
+
+function vkAddRow(container, prefill){
+  const box = document.getElementById('vk-manualRows');
+  const row = document.createElement('div');
+  row.className = 'vk-row';
+  row.innerHTML = `<input type="text" class="lz-input vk-wort" placeholder="Wort (${vkSelectedFach || 'Fremdsprache'})">
+    <input type="text" class="lz-input vk-uebersetzung" placeholder="Übersetzung (Deutsch)">
+    <button class="vk-row-rm" onclick="this.parentElement.remove()">✕</button>`;
+  box.appendChild(row);
+}
+
+const vkFileInput = document.getElementById('vk-fileInput');
+const vkDropzone = document.getElementById('vk-dropzone');
+vkFileInput.addEventListener('change', e => vkHandleFiles(e.target.files));
+vkDropzone.addEventListener('dragover', e => { e.preventDefault(); vkDropzone.classList.add('drag'); });
+vkDropzone.addEventListener('dragleave', () => vkDropzone.classList.remove('drag'));
+vkDropzone.addEventListener('drop', e => { e.preventDefault(); vkDropzone.classList.remove('drag'); vkHandleFiles(e.dataTransfer.files); });
+function vkHandleFiles(fileList){
+  [...fileList].forEach(file => {
+    if(!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = () => { vkUploadedImages.push({ dataUrl: reader.result, mediaType: file.type }); vkRenderThumbs(); };
+    reader.readAsDataURL(file);
+  });
+  vkFileInput.value = '';
+}
+function vkRenderThumbs(){
+  document.getElementById('vk-thumbs').innerHTML = vkUploadedImages.map((img, i) => `
+    <div class="lz-thumb"><img src="${img.dataUrl}"><button class="lz-rm" onclick="vkRemoveImage(${i})">✕</button></div>`).join('');
+}
+function vkRemoveImage(i){ vkUploadedImages.splice(i, 1); vkRenderThumbs(); }
+
+async function vkGenerate(){
+  const errorBox = document.getElementById('vk-errorBox');
+  errorBox.classList.add('lz-hidden');
+  const topic = document.getElementById('vk-topic').value.trim();
+  const manualPairs = [...document.querySelectorAll('#vk-manualRows .vk-row')].map(row => ({
+    wort: row.querySelector('.vk-wort').value.trim(),
+    uebersetzung: row.querySelector('.vk-uebersetzung').value.trim()
+  })).filter(p => p.wort && p.uebersetzung);
+
+  if(manualPairs.length === 0 && vkUploadedImages.length === 0){
+    errorBox.textContent = 'Bitte trag mindestens ein Wortpaar ein oder lade ein Foto hoch.';
+    errorBox.classList.remove('lz-hidden');
+    return;
+  }
+
+  const btn = document.getElementById('vk-generateBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="lz-spinner"></span> Wird erstellt …';
+  let allPairs = [...manualPairs];
+
+  if(vkUploadedImages.length > 0){
+    const progress = lzStartProgress('vk-progressWrap', 'vk-progressFill', 'vk-progressStatus', ['Lese Fotos …', 'Erkenne Wortpaare …', 'Räume auf …']);
+    const promptText = `Lies alle Wort-Übersetzungs-Paare aus den angehängten Foto(s) einer ${vkSelectedFach}-Vokabelliste. Sprache: ${vkSelectedFach}, Übersetzung auf Deutsch.
+Antworte AUSSCHLIESSLICH mit einem JSON-Array, kein Fließtext, keine Codeblöcke:
+[{"wort":"...","uebersetzung":"..."}]`;
+    const parts = [{ text: promptText }];
+    vkUploadedImages.forEach(img => {
+      const base64 = img.dataUrl.split(',')[1];
+      parts.push({ inline_data: { mime_type: img.mediaType, data: base64 } });
+    });
+    try{
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`, {
+        method: "POST", headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ contents: [{ parts: parts }] })
+      });
+      if(!response.ok){ const errText = await response.text(); throw new Error('API-Fehler: ' + response.status + ' — ' + errText.slice(0,200)); }
+      const data = await response.json();
+      const rawText = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts
+        ? data.candidates[0].content.parts.map(p => p.text || '').join('') : '';
+      if(!rawText) throw new Error('Keine Textantwort erhalten.');
+      const clean = rawText.trim().replace(/^```json/,'').replace(/^```/,'').replace(/```$/,'').trim();
+      let extracted;
+      try{ extracted = JSON.parse(clean); }
+      catch(e){ const match = clean.match(/\[[\s\S]*\]/); if(match) extracted = JSON.parse(match[0]); else throw new Error('Antwort konnte nicht gelesen werden.'); }
+      const existingWorte = new Set(allPairs.map(p => p.wort.toLowerCase()));
+      (extracted || []).forEach(p => { if(p.wort && p.uebersetzung && !existingWorte.has(p.wort.toLowerCase())){ allPairs.push(p); existingWorte.add(p.wort.toLowerCase()); } });
+    }catch(err){
+      console.error(err);
+      errorBox.textContent = 'Etwas ist schiefgelaufen: ' + err.message + ' — versuch es nochmal.';
+      errorBox.classList.remove('lz-hidden');
+      progress.stop();
+      btn.disabled = false; btn.innerHTML = '<span id="vk-btnLabel">Vokabelset erstellen</span>';
+      return;
+    }
+    progress.stop();
+  }
+
+  if(allPairs.length === 0){
+    errorBox.textContent = 'Es konnten keine Wortpaare erkannt werden.';
+    errorBox.classList.remove('lz-hidden');
+    btn.disabled = false; btn.innerHTML = '<span id="vk-btnLabel">Vokabelset erstellen</span>';
+    return;
+  }
+
+  const item = {
+    id: 'vk_' + Date.now(), fach: vkSelectedFach, thema: topic,
+    dateLabel: new Date().toLocaleDateString('de-DE', {day:'2-digit',month:'2-digit',year:'2-digit'}),
+    pairs: allPairs
+  };
+  vkCache.sets[vkSelectedFach] = vkCache.sets[vkSelectedFach] || [];
+  vkCache.sets[vkSelectedFach].push(item);
+  await vkDbInsert(item);
+  vkNavStack = ['dashboard','fach'];
+  vkGoResults(item);
+  btn.disabled = false; btn.innerHTML = '<span id="vk-btnLabel">Vokabelset erstellen</span>';
+}
+
+function vkRenderResults(item){
+  document.getElementById('vk-editCard').classList.add('lz-hidden');
+  vkFlashcards = item.pairs.map(p => ({ frage: p.wort, antwort: p.uebersetzung }));
+  vkCurrentCard = 0;
+  vkSetCardMode('browse');
+  vkRenderCard();
+}
+function vkToggleEdit(){
+  const box = document.getElementById('vk-editRows');
+  box.innerHTML = '';
+  vkCurrentItem.pairs.forEach(p => vkAddEditRow(p));
+  document.getElementById('vk-editCard').classList.remove('lz-hidden');
+}
+function vkAddEditRow(prefill){
+  const box = document.getElementById('vk-editRows');
+  const row = document.createElement('div');
+  row.className = 'vk-row';
+  row.innerHTML = `<input type="text" class="lz-input vk-wort" value="${prefill ? lzEscapeHtml(prefill.wort) : ''}" placeholder="Wort">
+    <input type="text" class="lz-input vk-uebersetzung" value="${prefill ? lzEscapeHtml(prefill.uebersetzung) : ''}" placeholder="Übersetzung">
+    <button class="vk-row-rm" onclick="this.parentElement.remove()">✕</button>`;
+  box.appendChild(row);
+}
+function vkSaveEdit(){
+  const pairs = [...document.querySelectorAll('#vk-editRows .vk-row')].map(row => ({
+    wort: row.querySelector('.vk-wort').value.trim(),
+    uebersetzung: row.querySelector('.vk-uebersetzung').value.trim()
+  })).filter(p => p.wort && p.uebersetzung);
+  vkCurrentItem.pairs = pairs;
+  const arr = vkCache.sets[vkCurrentItem.fach] || [];
+  const idx = arr.findIndex(i => i.id === vkCurrentItem.id);
+  if(idx !== -1) arr[idx] = vkCurrentItem;
+  vkDbUpdate(vkCurrentItem.id, { pairs: pairs });
+  document.getElementById('vk-editCard').classList.add('lz-hidden');
+  vkRenderResults(vkCurrentItem);
+}
+function vkCancelEdit(){ document.getElementById('vk-editCard').classList.add('lz-hidden'); }
+
+function vkSetCardMode(mode){
+  vkCardMode = mode;
+  document.getElementById('vk-modeBrowseBtn').classList.toggle('active', mode==='browse');
+  document.getElementById('vk-modeQuizBtn').classList.toggle('active', mode==='quiz');
+  document.getElementById('vk-browseMode').classList.toggle('lz-hidden', mode!=='browse');
+  document.getElementById('vk-quizMode').classList.toggle('lz-hidden', mode!=='quiz');
+  if(mode==='quiz') vkStartQuiz();
+}
+function vkRenderCard(){
+  if(vkFlashcards.length === 0){
+    document.getElementById('vk-cardFront').textContent = 'Keine Vokabeln vorhanden.';
+    document.getElementById('vk-cardBack').textContent = '';
+    document.getElementById('vk-deckCount').textContent = '0 / 0';
+    return;
+  }
+  const card = document.getElementById('vk-flashcard');
+  card.classList.remove('flipped');
+  const c = vkFlashcards[vkCurrentCard];
+  document.getElementById('vk-cardFront').textContent = c.frage;
+  document.getElementById('vk-cardBack').textContent = c.antwort;
+  document.getElementById('vk-deckCount').textContent = `${vkCurrentCard+1} / ${vkFlashcards.length}`;
+  document.getElementById('vk-prevBtn').disabled = vkCurrentCard === 0;
+  document.getElementById('vk-nextBtn').disabled = vkCurrentCard === vkFlashcards.length - 1;
+}
+function vkFlipCard(){ document.getElementById('vk-flashcard').classList.toggle('flipped'); }
+function vkNextCard(){ if(vkCurrentCard < vkFlashcards.length - 1){ vkCurrentCard++; vkRenderCard(); } }
+function vkPrevCard(){ if(vkCurrentCard > 0){ vkCurrentCard--; vkRenderCard(); } }
+function vkShuffleCards(){
+  for(let i = vkFlashcards.length - 1; i > 0; i--){ const j = Math.floor(Math.random()*(i+1)); [vkFlashcards[i],vkFlashcards[j]]=[vkFlashcards[j],vkFlashcards[i]]; }
+  vkCurrentCard = 0; vkRenderCard();
+}
+function vkStartQuiz(){
+  const shuffled = [...vkFlashcards];
+  for(let i = shuffled.length - 1; i > 0; i--){ const j = Math.floor(Math.random()*(i+1)); [shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]; }
+  vkQuiz = { queue: shuffled, index:0, correct:0, incorrect:0, wrongCards:[], revealed:false };
+  document.getElementById('vk-quizActive').classList.remove('lz-hidden');
+  document.getElementById('vk-quizDone').classList.add('lz-hidden');
+  vkRenderQuiz();
+}
+function vkRenderQuiz(){
+  if(!vkQuiz || vkQuiz.queue.length === 0){ document.getElementById('vk-quizFront').textContent = 'Keine Vokabeln vorhanden.'; return; }
+  if(vkQuiz.index >= vkQuiz.queue.length){ vkFinishQuiz(); return; }
+  const c = vkQuiz.queue[vkQuiz.index];
+  document.getElementById('vk-quizFront').textContent = c.frage;
+  document.getElementById('vk-quizBack').textContent = c.antwort;
+  document.getElementById('vk-quizCard').classList.remove('flipped');
+  vkQuiz.revealed = false;
+  document.getElementById('vk-quizTapHint').textContent = 'Zum Zeigen der Antwort tippen';
+  document.getElementById('vk-quizProgress').textContent = `Karte ${vkQuiz.index+1} / ${vkQuiz.queue.length} · ${vkQuiz.correct} richtig`;
+  document.getElementById('vk-quizActions').innerHTML = '';
+}
+function vkQuizReveal(){
+  if(!vkQuiz || vkQuiz.revealed) return;
+  vkQuiz.revealed = true;
+  document.getElementById('vk-quizCard').classList.add('flipped');
+  document.getElementById('vk-quizActions').innerHTML = `
+    <button class="lz-btn-wrong" onclick="vkQuizMark(false)">✗ Falsch</button>
+    <button class="lz-btn-correct" onclick="vkQuizMark(true)">✓ Richtig</button>`;
+}
+function vkQuizMark(isCorrect){
+  const c = vkQuiz.queue[vkQuiz.index];
+  if(isCorrect) vkQuiz.correct++; else { vkQuiz.incorrect++; vkQuiz.wrongCards.push(c); }
+  vkQuiz.index++;
+  vkRenderQuiz();
+}
+function vkFinishQuiz(){
+  document.getElementById('vk-quizActive').classList.add('lz-hidden');
+  const done = document.getElementById('vk-quizDone');
+  done.classList.remove('lz-hidden');
+  const total = vkQuiz.correct + vkQuiz.incorrect;
+  done.innerHTML = `
+    <div class="lz-quiz-score">${vkQuiz.correct} / ${total}</div>
+    <div class="lz-quiz-score-lbl">richtig beantwortet</div>
+    <div class="lz-actions-row">
+      ${vkQuiz.wrongCards.length > 0 ? `<button class="lz-new-btn" onclick="vkRetryWrong()">Falsche nochmal (${vkQuiz.wrongCards.length})</button>` : ''}
+      <button class="lz-btn-ghost" onclick="vkStartQuiz()">Neu mischen</button>
+    </div>`;
+}
+function vkRetryWrong(){ vkFlashcards = vkQuiz.wrongCards; vkStartQuiz(); }
+
+if(localStorage.getItem('lz_unlocked') === 'true'){ lzBoot(); vkBoot(); }
 </script>
 </body>
 </html>
