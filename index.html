@@ -1290,6 +1290,11 @@
         <label class="lz-label">Zusätzliche Notizen (optional)</label>
         <textarea class="lz-textarea" id="lz-notes" placeholder="Falls du noch was in Textform ergänzen willst …"></textarea>
 
+        <label class="lz-check-item" style="margin-top:1.25rem; display:flex;">
+          <input type="checkbox" id="lz-deepThink">
+          <span><span class="lz-ci-thema">🧠 Extra gründlich nachdenken</span><br><span class="lz-hint" style="margin:0;">Dauert länger, aber die KI prüft Vollständigkeit & Korrektheit gründlicher</span></span>
+        </label>
+
         <div style="margin-top:1.25rem;">
           <button class="lz-new-btn" id="lz-generateBtn" onclick="lzGenerate()"><span id="lz-btnLabel">Lernzettel erstellen</span></button>
           <div class="lz-progress-wrap lz-hidden" id="lz-progressWrap">
@@ -2013,10 +2018,17 @@ async function lzGenerate(){
     errorBox.classList.remove('lz-hidden');
     return;
   }
+  const deepThink = document.getElementById('lz-deepThink').checked;
   const btn = document.getElementById('lz-generateBtn');
   btn.disabled = true;
   btn.innerHTML = '<span class="lz-spinner"></span> Lernzettel wird erstellt …';
-  const progress = lzStartProgress('lz-progressWrap', 'lz-progressFill', 'lz-progressStatus', [
+  const progress = lzStartProgress('lz-progressWrap', 'lz-progressFill', 'lz-progressStatus', deepThink ? [
+    lzUploadedImages.length > 0 ? 'Lese Fotos …' : 'Sammle Infos …',
+    'Denkt extra gründlich nach …',
+    'Prüft Vollständigkeit mehrfach …',
+    'Strukturiert Lernzettel …',
+    'Erstellt Karteikarten …'
+  ] : [
     lzUploadedImages.length > 0 ? 'Lese Fotos …' : 'Sammle Infos …',
     'Strukturiere Lernzettel …',
     'Prüfe auf Lücken …',
@@ -2030,6 +2042,7 @@ Thema: ${topic || '(kein spezifisches Thema angegeben)'}
 ${lzUploadedImages.length > 0 ? 'Im Anhang sind Fotos der handschriftlichen Mitschrift des Schülers. Lies den Inhalt sorgfältig aus den Bildern.' : ''}
 ${notes ? 'Zusätzliche Notizen:\n"""\n' + notes + '\n"""' : ''}
 ${lzUploadedImages.length === 0 && !notes ? 'Es liegt keine Mitschrift vor — erstelle den Lernzettel aus eigenem Fachwissen zum Thema.' : ''}
+${deepThink ? '\nWICHTIG: Nimm dir für diese Aufgabe besonders viel Zeit. Denke gründlich und Schritt für Schritt nach, bevor du antwortest. Prüfe am Ende mehrfach auf fachliche Korrektheit, Vollständigkeit und ob wirklich alle prüfungsrelevanten Aspekte abgedeckt sind.' : ''}
 
 Aufgaben:
 1. Erstelle einen klar strukturierten Lernzettel auf Deutsch (Markdown: ## für Abschnitte, **fett** für Kernbegriffe, - für Listen). Nutze primär die Mitschrift (Fotos/Notizen), ergänze fehlende Grundlagen aus deinem Wissen, wo nötig für ein vollständiges Verständnis. Passe Stil und Fachsprache an das Fach "${lzSelectedFach}" an. WICHTIG: Schreibe alle mathematischen Formeln und Symbole in LaTeX-Syntax mit $...$ für Inline-Formeln bzw. $$...$$ für freistehende Formeln (z. B. $x^2 + y^2 = z^2$ oder $$\\\\binom{n}{k}$$). Kein Klartext für Formeln.
@@ -2047,11 +2060,16 @@ Wenn nichts Wichtiges fehlt, gib ein leeres gaps-Array zurück.`;
     parts.push({ inline_data: { mime_type: img.mediaType, data: base64 } });
   });
 
+  const requestBody = { contents: [{ parts: parts }] };
+  if(deepThink){
+    requestBody.generationConfig = { thinkingConfig: { thinkingBudget: 24576 } };
+  }
+
   try{
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`, {
       method: "POST",
       headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ contents: [{ parts: parts }] })
+      body: JSON.stringify(requestBody)
     });
     if(!response.ok){
       const errText = await response.text();
