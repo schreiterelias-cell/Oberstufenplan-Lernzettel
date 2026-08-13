@@ -160,6 +160,18 @@
   .matrix-legend-note { font-size: 0.7rem; color: var(--muted); margin-top: 0.75rem; text-align: center; }
   .matrix-row.dimmed { opacity: 0.25; }
 
+  /* STUNDENPLAN */
+  .stundenplan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+  .sp-day { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.1rem; }
+  .sp-day-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--pruef); margin-bottom: 0.6rem; }
+  .sp-row { display: grid; grid-template-columns: 44px 1fr; grid-template-areas: "time fach" ". meta"; align-items: baseline; gap: 0.15rem 0.5rem; padding: 0.4rem 0; border-bottom: 1px solid var(--border); }
+  .sp-row:last-child { border-bottom: none; }
+  .sp-time { grid-area: time; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--muted); }
+  .sp-fach { grid-area: fach; font-size: 0.85rem; font-weight: 600; }
+  .sp-meta { grid-area: meta; font-size: 0.7rem; color: var(--muted); }
+  .sp-row-open .sp-fach { color: var(--solide); }
+  .sp-row-open .sp-meta { color: var(--solide); }
+
   /* KLAUSUR TRACKER */
   .ki-panel { margin-bottom: 1.5rem; }
   .ki-result { display: none; margin-top: 1rem; background: var(--pruef-bg); border: 1px solid rgba(45,139,139,0.3); border-radius: 10px; padding: 1.1rem 1.25rem; font-size: 0.85rem; line-height: 1.6; }
@@ -422,6 +434,7 @@
     <div class="tab" onclick="showTab('deutsch')">⚠️ Deutsch-Guide</div>
     <div class="tab" onclick="showTab('lernzettel')">📝 Lernzettel</div>
     <div class="tab" onclick="showTab('vokabeln')">🔤 Vokabeltrainer</div>
+    <div class="tab" onclick="showTab('stundenplan')">🗓️ Stundenplan</div>
   </div>
 
   <!-- TAB: PLAN -->
@@ -1616,6 +1629,48 @@
 
   </div>
 
+  <!-- TAB: STUNDENPLAN -->
+  <div class="tab-content" id="tab-stundenplan">
+    <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.2rem;margin-bottom:0.4rem;">🗓️ Stundenplan</h2>
+    <p class="hint-text" style="margin-bottom:1rem;">Dein aktueller Stundenplan.</p>
+    <div class="stundenplan-grid">
+      <div class="sp-day">
+        <div class="sp-day-title">Montag</div>
+        <div class="sp-row"><span class="sp-time">2./3.</span><span class="sp-fach">Französisch</span><span class="sp-meta">fr2 · Schoffer</span></div>
+        <div class="sp-row"><span class="sp-time">4./5.</span><span class="sp-fach">Deutsch</span><span class="sp-meta">de2 · Pratz</span></div>
+        <div class="sp-row"><span class="sp-time">6./7.</span><span class="sp-fach">Kunst</span><span class="sp-meta">ku4 · Schmiedel</span></div>
+        <div class="sp-row"><span class="sp-time">8./9.</span><span class="sp-fach">Geographie</span><span class="sp-meta">geo1 · Diedering</span></div>
+      </div>
+      <div class="sp-day">
+        <div class="sp-day-title">Dienstag</div>
+        <div class="sp-row"><span class="sp-time">1.</span><span class="sp-fach">Französisch</span><span class="sp-meta">fr2 · Schoffer</span></div>
+        <div class="sp-row"><span class="sp-time">2./3.</span><span class="sp-fach">Sport</span><span class="sp-meta">sp4 · Börner</span></div>
+        <div class="sp-row"><span class="sp-time">4./5.</span><span class="sp-fach">Physik LK</span><span class="sp-meta">PH2 · Wätzold</span></div>
+        <div class="sp-row"><span class="sp-time">6./7.</span><span class="sp-fach">Geschichte</span><span class="sp-meta">ge3 · Skurnia</span></div>
+      </div>
+      <div class="sp-day">
+        <div class="sp-day-title">Mittwoch</div>
+        <div class="sp-row"><span class="sp-time">1.</span><span class="sp-fach">Physik LK</span><span class="sp-meta">PH2 · Wätzold</span></div>
+        <div class="sp-row"><span class="sp-time">2./3.</span><span class="sp-fach">Informatik</span><span class="sp-meta">inf2 · Köhler</span></div>
+        <div class="sp-row"><span class="sp-time">4./5.</span><span class="sp-fach">Mathe LK</span><span class="sp-meta">MA2 · Köhler</span></div>
+        <div class="sp-row"><span class="sp-time">6./7.</span><span class="sp-fach">Kunst</span><span class="sp-meta">ku4 · Schmiedel</span></div>
+      </div>
+      <div class="sp-day">
+        <div class="sp-day-title">Donnerstag</div>
+        <div class="sp-row"><span class="sp-time">1.</span><span class="sp-fach">Mathe LK</span><span class="sp-meta">MA2 · Köhler</span></div>
+        <div class="sp-row"><span class="sp-time">2./3.</span><span class="sp-fach">Deutsch</span><span class="sp-meta">de2 · Pratz</span></div>
+        <div class="sp-row"><span class="sp-time">4./5.</span><span class="sp-fach">Englisch</span><span class="sp-meta">en3 · Fischer</span></div>
+        <div class="sp-row"><span class="sp-time">6./7.</span><span class="sp-fach">Physik LK</span><span class="sp-meta">PH2 · Wätzold</span></div>
+      </div>
+      <div class="sp-day">
+        <div class="sp-day-title">Freitag</div>
+        <div class="sp-row"><span class="sp-time">2./3.</span><span class="sp-fach">Chemie</span><span class="sp-meta">ch2 · Börner</span></div>
+        <div class="sp-row"><span class="sp-time">4./5.</span><span class="sp-fach">Mathe LK</span><span class="sp-meta">MA2 · Köhler</span></div>
+        <div class="sp-row"><span class="sp-time">6./7.</span><span class="sp-fach">Ethik</span><span class="sp-meta">eth4 · Graupner</span></div>
+      </div>
+    </div>
+  </div>
+
   <div class="footer">
     Strategieplan · Sachsen Gymnasium Oberstufe · Themen basieren auf sächsischem Lehrplan · Oberstufenberater fragen!
   </div>
@@ -2042,6 +2097,631 @@ if(window.supabase && SUPABASE_URL.startsWith('http')){
   sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
 loadKlausurData();
+const LZ_SEED_DEFAULTS = [
+  {
+    "id": "lz_grund_mathematik",
+    "fach": "Mathematik",
+    "thema": "Vorwissen für die 11. Klasse (Grundlagen aus Sek I)",
+    "dateLabel": "Vorwissen",
+    "lernzettel": "## Bruch-, Prozent- und Zinsrechnung\nSicherer Umgang mit Brüchen (kürzen, erweitern, Grundrechenarten), Prozentrechnung ($G$, $W$, $p\\%$) und einfache Zinsrechnung. Diese Grundlagen brauchst du ständig, z. B. bei Wahrscheinlichkeiten oder Wachstumsprozessen.\n\n## Terme und Gleichungen\n- **Termumformungen**: Ausklammern, binomische Formeln ($(a+b)^2=a^2+2ab+b^2$, $(a-b)^2=a^2-2ab+b^2$, $(a+b)(a-b)=a^2-b^2$)\n- **Lineare Gleichungen**: nach $x$ auflösen, Äquivalenzumformungen\n- **Quadratische Gleichungen**: $ax^2+bx+c=0$ lösen mit der Mitternachtsformel $x_{1,2}=\\dfrac{-b\\pm\\sqrt{b^2-4ac}}{2a}$ oder der $pq$-Formel $x_{1,2}=-\\dfrac{p}{2}\\pm\\sqrt{\\left(\\dfrac{p}{2}\\right)^2-q}$\n- **Lineare Gleichungssysteme**: Einsetzungs-, Gleichsetzungs- und Additionsverfahren\n- **Ungleichungen**: Vorzeichenwechsel bei Multiplikation/Division mit negativen Zahlen beachten\n\n## Funktionen\n- **Lineare Funktionen**: $y=mx+b$, Steigung $m$, Nullstellen berechnen\n- **Quadratische Funktionen**: Normalform, Scheitelpunktform $y=a(x-d)^2+e$, Nullstellen über $pq$-Formel\n- **Potenz- und Wurzelfunktionen**: $y=x^n$, Wurzelgesetze\n- **Exponentialfunktionen**: $y=a\\cdot b^x$, Wachstum und Zerfall\n\n## Geometrie\n- **Satz des Pythagoras**: $a^2+b^2=c^2$ im rechtwinkligen Dreieck\n- **Strahlensätze**: Verhältnisse bei sich schneidenden Geraden\n- **Trigonometrie im rechtwinkligen Dreieck**: $\\sin\\alpha=\\dfrac{\\text{Gegenkathete}}{\\text{Hypotenuse}}$, $\\cos\\alpha=\\dfrac{\\text{Ankathete}}{\\text{Hypotenuse}}$, $\\tan\\alpha=\\dfrac{\\text{Gegenkathete}}{\\text{Ankathete}}$\n- **Flächen & Volumen**: Kreis ($A=\\pi r^2$), Prisma, Zylinder, Pyramide, Kegel, Kugel ($V=\\dfrac{4}{3}\\pi r^3$)\n\n## Stochastik-Grundlagen\nLaplace-Wahrscheinlichkeit $P=\\dfrac{\\text{günstige Ereignisse}}{\\text{mögliche Ereignisse}}$, Baumdiagramme, Pfadregeln, einfache Kombinatorik.\n\n## Was in Klasse 11 als LK neu dazukommt\nDifferenzialrechnung (Ableitungen, Kurvendiskussion), Integralrechnung, Vektorrechnung/analytische Geometrie, vertiefte Stochastik (Erwartungswert, Binomialverteilung). Ein sattes Fundament in den obigen Themen ist die Basis für alles Neue.",
+    "gaps": [],
+    "flashcards": [
+      {
+        "frage": "Wie lautet die Mitternachtsformel?",
+        "antwort": "$x_{1,2}=\\dfrac{-b\\pm\\sqrt{b^2-4ac}}{2a}$"
+      },
+      {
+        "frage": "Wie lautet der Satz des Pythagoras?",
+        "antwort": "$a^2+b^2=c^2$ (im rechtwinkligen Dreieck)"
+      },
+      {
+        "frage": "Erste binomische Formel?",
+        "antwort": "$(a+b)^2=a^2+2ab+b^2$"
+      },
+      {
+        "frage": "Dritte binomische Formel?",
+        "antwort": "$(a+b)(a-b)=a^2-b^2$"
+      },
+      {
+        "frage": "Scheitelpunktform einer Parabel?",
+        "antwort": "$y=a(x-d)^2+e$, Scheitel bei $(d|e)$"
+      },
+      {
+        "frage": "Formel für Laplace-Wahrscheinlichkeit?",
+        "antwort": "$P=\\dfrac{\\text{günstige}}{\\text{mögliche Ereignisse}}$"
+      },
+      {
+        "frage": "Sinus im rechtwinkligen Dreieck?",
+        "antwort": "$\\sin\\alpha=\\dfrac{\\text{Gegenkathete}}{\\text{Hypotenuse}}$"
+      },
+      {
+        "frage": "Kreisfläche?",
+        "antwort": "$A=\\pi r^2$"
+      },
+      {
+        "frage": "Kugelvolumen?",
+        "antwort": "$V=\\dfrac{4}{3}\\pi r^3$"
+      },
+      {
+        "frage": "Was verändert die Ungleichung beim Multiplizieren mit negativer Zahl?",
+        "antwort": "Das Ungleichheitszeichen dreht sich um."
+      }
+    ],
+    "kind": "normal"
+  },
+  {
+    "id": "lz_grund_physik",
+    "fach": "Physik",
+    "thema": "Vorwissen für die 11. Klasse (Grundlagen aus Sek I)",
+    "dateLabel": "Vorwissen",
+    "lernzettel": "## Mechanik\n- **Kinematik**: gleichförmige Bewegung $v=\\dfrac{s}{t}$, gleichmäßig beschleunigte Bewegung $a=\\dfrac{\\Delta v}{\\Delta t}$, $s=\\dfrac{1}{2}at^2$\n- **Kräfte**: Newtonsche Gesetze ($F=ma$), Gewichtskraft $F_G=mg$, Reibung, Kräftegleichgewicht/-zerlegung\n- **Energie & Arbeit**: $W=F\\cdot s$, kinetische Energie $E_{kin}=\\dfrac{1}{2}mv^2$, potenzielle Energie $E_{pot}=mgh$, Energieerhaltungssatz\n- **Leistung**: $P=\\dfrac{W}{t}$\n\n## Elektrizitätslehre\n- Stromkreise: Reihen- und Parallelschaltung\n- Ohmsches Gesetz: $U=R\\cdot I$\n- Elektrische Leistung: $P=U\\cdot I$\n- Ladung, Spannung, Widerstand — Grundbegriffe sicher unterscheiden können\n\n## Wärmelehre\nTemperatur, Wärmeenergie $Q=mc\\Delta T$, Aggregatzustände, Wärmeausdehnung.\n\n## Optik\nLichtausbreitung, Reflexion (Einfallswinkel = Ausfallswinkel), Brechung, Linsen (Sammel-/Zerstreuungslinse), einfache Strahlengänge.\n\n## Größen, Einheiten & Arbeitsweise\n- SI-Einheiten sicher beherrschen (m, s, kg, N, J, W, V, A, Ω)\n- Einheiten umrechnen (z. B. km/h in m/s)\n- Größengleichungen aufstellen und nach gesuchter Größe umstellen\n- Signifikante Stellen / sinnvolles Runden bei Messwerten\n\n## Was in Klasse 11 (LK) neu dazukommt\nVertiefte Mechanik (Impuls, Erhaltungssätze), elektrische Felder, Schwingungen und Wellen, später Atom-/Quantenphysik. Sauberes Rechnen mit Formeln und Einheiten aus der Mittelstufe ist die wichtigste Grundlage.",
+    "gaps": [],
+    "flashcards": [
+      {
+        "frage": "Formel für gleichmäßig beschleunigte Bewegung (Weg)?",
+        "antwort": "$s=\\dfrac{1}{2}at^2$"
+      },
+      {
+        "frage": "2. Newtonsches Gesetz?",
+        "antwort": "$F=m\\cdot a$"
+      },
+      {
+        "frage": "Formel für kinetische Energie?",
+        "antwort": "$E_{kin}=\\dfrac{1}{2}mv^2$"
+      },
+      {
+        "frage": "Formel für potenzielle Energie?",
+        "antwort": "$E_{pot}=m\\cdot g\\cdot h$"
+      },
+      {
+        "frage": "Ohmsches Gesetz?",
+        "antwort": "$U=R\\cdot I$"
+      },
+      {
+        "frage": "Elektrische Leistung?",
+        "antwort": "$P=U\\cdot I$"
+      },
+      {
+        "frage": "Reflexionsgesetz?",
+        "antwort": "Einfallswinkel = Ausfallswinkel"
+      },
+      {
+        "frage": "Formel für Leistung (allgemein)?",
+        "antwort": "$P=\\dfrac{W}{t}$"
+      },
+      {
+        "frage": "Wie rechnet man km/h in m/s um?",
+        "antwort": "Durch 3,6 teilen"
+      },
+      {
+        "frage": "Formel für Wärmeenergie?",
+        "antwort": "$Q=m\\cdot c\\cdot \\Delta T$"
+      }
+    ],
+    "kind": "normal"
+  },
+  {
+    "id": "lz_grund_deutsch",
+    "fach": "Deutsch",
+    "thema": "Vorwissen für die 11. Klasse (Grundlagen aus Sek I)",
+    "dateLabel": "Vorwissen",
+    "lernzettel": "## Textanalyse-Grundlagen\n- **Epische Texte**: Erzählperspektive (auktorial, personal, Ich-Erzähler), Erzählzeit vs. erzählte Zeit, Charakterisierung (direkt/indirekt)\n- **Lyrik**: Reimschema (Paar-, Kreuz-, umarmender Reim), Metrum (Jambus, Trochäus), Kadenzen, gängige Stilmittel (Metapher, Vergleich, Anapher, Alliteration, Personifikation, Hyperbel, Ellipse)\n- **Dramatik**: Aufbau des klassischen Dramas (5 Akte, geschlossene/offene Form), Regieanweisungen, Dialoganalyse\n\n## Textsorten & Schreibformen\n- Charakterisierung, Inhaltsangabe (Präsens, sachlich, im eigenen Wort)\n- Erörterung (dialektisch/linear): These, Argument, Beleg, Beispiel\n- Textgebundene Erörterung, Interpretation literarischer Texte\n\n## Grammatik & Sprache\n- Satzglieder (Subjekt, Prädikat, Objekte, Adverbiale) und Satzarten (Haupt-/Nebensatz)\n- Zeitformen sicher anwenden, Konjunktiv I (indirekte Rede) und II\n- Zeichensetzung (v. a. Kommaregeln bei Haupt-/Nebensätzen, Infinitivgruppen)\n- Rechtschreibung: Groß-/Kleinschreibung, s/ss/ß-Regeln\n\n## Literaturgeschichte (Überblick)\nGrobe Einordnung wichtiger Epochen (Aufklärung, Klassik, Romantik, Realismus, Moderne) und ihrer zentralen Merkmale/Autoren — als Orientierungsrahmen für die Oberstufe.\n\n## Was in Klasse 11 neu dazukommt\nVertiefte Interpretation komplexer Werke (Ganzschriften), wissenschaftliches Arbeiten/Zitieren, Vergleichende Analyse mehrerer Texte, Rhetorik und Sprachkritik. Ein sicheres Fundament in Stilmitteln, Textsorten und Grammatik erleichtert dir das Verfassen klausurtauglicher Texte enorm.",
+    "gaps": [],
+    "flashcards": [
+      {
+        "frage": "Was ist eine Metapher?",
+        "antwort": "Bildhafte Übertragung ohne Vergleichswort (z. B. „Zeit ist Geld“)"
+      },
+      {
+        "frage": "Was ist eine Anapher?",
+        "antwort": "Wiederholung eines Wortes/einer Wortgruppe am Satz-/Versanfang"
+      },
+      {
+        "frage": "Unterschied auktorialer vs. personaler Erzähler?",
+        "antwort": "Auktorial: allwissend, kommentiert; personal: Sicht einer Figur, kein Wissen über andere Gedanken"
+      },
+      {
+        "frage": "Wann nutzt man den Konjunktiv I?",
+        "antwort": "Bei der indirekten Rede"
+      },
+      {
+        "frage": "Was ist ein Jambus?",
+        "antwort": "Versfuß: unbetont-betont (x X)"
+      },
+      {
+        "frage": "Kreuzreim-Schema?",
+        "antwort": "abab"
+      },
+      {
+        "frage": "In welcher Zeitform schreibt man eine Inhaltsangabe?",
+        "antwort": "Präsens"
+      },
+      {
+        "frage": "Was ist eine Ellipse (Stilmittel)?",
+        "antwort": "Weglassen von Satzteilen, die sich aus dem Kontext erschließen"
+      },
+      {
+        "frage": "Was gehört zu einer dialektischen Erörterung?",
+        "antwort": "Pro- und Contra-Argumente abwägend gegenüberstellen"
+      },
+      {
+        "frage": "Wann steht ein Komma vor „und“?",
+        "antwort": "Meist nicht, außer bei zwei vollständigen Hauptsätzen ist es optional/bei Aufzählungen nicht nötig"
+      }
+    ],
+    "kind": "normal"
+  },
+  {
+    "id": "lz_grund_informatik",
+    "fach": "Informatik",
+    "thema": "Vorwissen für die 11. Klasse (Grundlagen aus Sek I)",
+    "dateLabel": "Vorwissen",
+    "lernzettel": "## Grundlagen der Datenrepräsentation\n- Zahlensysteme: Dual-, Dezimal-, Hexadezimalsystem und Umrechnung zwischen ihnen\n- Bit und Byte, Speichergrößen (KB, MB, GB)\n- Zeichenkodierung (ASCII als Grundprinzip)\n\n## Algorithmen & Programmierung\n- Grundstrukturen: Sequenz, Verzweigung (if/else), Schleifen (for, while)\n- Variablen, Datentypen (Integer, Float, String, Boolean)\n- Einfache Algorithmen als Struktogramm/Flussdiagramm darstellen können\n- Grundverständnis einer Programmiersprache (z. B. Python oder die in der Sek I genutzte Sprache): Funktionen, Parameter, Rückgabewerte\n\n## Datenstrukturen (Basics)\nFelder/Arrays/Listen: Werte speichern und über Index ansprechen; einfache Sortier-/Suchidee (z. B. lineare Suche).\n\n## Modellierung\nEinfache Objektorientierung: Objekt, Klasse, Attribut, Methode — Grundidee, dass Objekte Eigenschaften und Verhalten haben.\n\n## Rechnerarchitektur & Netzwerke (Grundverständnis)\nEVA-Prinzip (Eingabe–Verarbeitung–Ausgabe), grober Aufbau eines Rechners (CPU, RAM, Speicher), Grundidee von Internet/Client-Server.\n\n## Was in Klasse 11 neu dazukommt\nVertiefte Programmierung (oft objektorientiert, z. B. Java), Datenbanken (SQL), Automaten und formale Sprachen, komplexere Algorithmen und Komplexität. Sicherer Umgang mit Grundstrukturen (Schleifen, Verzweigungen, Variablen) ist die wichtigste Basis, um in der Oberstufe nicht bei null anzufangen.",
+    "gaps": [],
+    "flashcards": [
+      {
+        "frage": "Wie viele Bit hat ein Byte?",
+        "antwort": "8 Bit"
+      },
+      {
+        "frage": "Was macht eine for-Schleife?",
+        "antwort": "Wiederholt einen Codeblock eine festgelegte Anzahl an Malen"
+      },
+      {
+        "frage": "Was ist der Unterschied zwischen Integer und Float?",
+        "antwort": "Integer = Ganzzahl, Float = Kommazahl (Fließkommazahl)"
+      },
+      {
+        "frage": "Was bedeutet EVA-Prinzip?",
+        "antwort": "Eingabe – Verarbeitung – Ausgabe"
+      },
+      {
+        "frage": "Was ist eine Variable?",
+        "antwort": "Ein benannter Speicherplatz für einen Wert"
+      },
+      {
+        "frage": "Was ist ein Array/eine Liste?",
+        "antwort": "Eine geordnete Sammlung von Werten, ansprechbar über einen Index"
+      },
+      {
+        "frage": "Wandle Dezimal 10 ins Dualsystem um.",
+        "antwort": "1010"
+      },
+      {
+        "frage": "Was ist eine Klasse in der Objektorientierung?",
+        "antwort": "Ein Bauplan/Schema für Objekte mit Attributen und Methoden"
+      },
+      {
+        "frage": "Was ist ein Boolean?",
+        "antwort": "Ein Wahrheitswert: true oder false"
+      },
+      {
+        "frage": "Was macht eine if-Verzweigung?",
+        "antwort": "Führt Code abhängig von einer Bedingung nur bei Erfüllung aus"
+      }
+    ],
+    "kind": "normal"
+  },
+  {
+    "id": "lz_grund_geographie",
+    "fach": "Geographie",
+    "thema": "Vorwissen für die 11. Klasse (Grundlagen aus Sek I)",
+    "dateLabel": "Vorwissen",
+    "lernzettel": "## Physische Geographie\n- **Klima**: Klimazonen der Erde, Klimadiagramme lesen (Temperatur/Niederschlag), Unterschied Wetter vs. Klima\n- **Landschaftsformen**: Entstehung durch endogene (Plattentektonik, Vulkanismus, Erdbeben) und exogene Kräfte (Erosion, Verwitterung)\n- **Gewässer**: Flusssysteme, Wasserkreislauf, Grundwasser\n\n## Bevölkerungs- und Wirtschaftsgeographie\n- Bevölkerungsentwicklung, Bevölkerungspyramiden lesen\n- Push- und Pull-Faktoren bei Migration\n- Wirtschaftssektoren (primär, sekundär, tertiär), Globalisierung Grundbegriffe\n- Entwicklungsindikatoren (z. B. BIP, HDI) als grobe Orientierung\n\n## Raumanalyse & Arbeitstechniken\n- **Karten lesen**: Maßstab, Legende, Höhenlinien, thematische Karten interpretieren\n- **Diagramme auswerten**: Balken-, Kreis-, Klimadiagramme beschreiben und interpretieren\n- Statistiken/Tabellen sachlich auswerten (Trends benennen, Ursachen einordnen)\n\n## Deutschland & Europa im Überblick\nGrobe geographische Gliederung Deutschlands (Naturräume, Bundesländer), Lage und wirtschaftliche Grundstruktur der EU.\n\n## Was in Klasse 11 (Prüfungsfach) neu dazukommt\nVertiefte Raumanalyse globaler Prozesse (Landwirtschaft im Wandel, Stadtgeographie, Klimawandel-Folgen, Disparitäten), stärker wissenschaftliches Arbeiten mit Modellen und Fachbegriffen. Sicheres Karten- und Diagrammlesen ist die Grundlage für fast jede Klausuraufgabe.",
+    "gaps": [],
+    "flashcards": [
+      {
+        "frage": "Unterschied Wetter und Klima?",
+        "antwort": "Wetter = kurzfristiger Zustand, Klima = langfristiges Durchschnittsmuster (i. d. R. 30 Jahre)"
+      },
+      {
+        "frage": "Was zeigt ein Klimadiagramm?",
+        "antwort": "Monatliche Durchschnittstemperatur und Niederschlag eines Ortes"
+      },
+      {
+        "frage": "Was sind Push-Faktoren bei Migration?",
+        "antwort": "Gründe, die Menschen aus einem Gebiet vertreiben (z. B. Armut, Konflikt)"
+      },
+      {
+        "frage": "Was sind die drei Wirtschaftssektoren?",
+        "antwort": "Primär (Landwirtschaft/Rohstoffe), Sekundär (Industrie), Tertiär (Dienstleistung)"
+      },
+      {
+        "frage": "Was zeigen Höhenlinien auf einer Karte?",
+        "antwort": "Punkte gleicher Höhe über dem Meeresspiegel"
+      },
+      {
+        "frage": "Was ist das BIP?",
+        "antwort": "Bruttoinlandsprodukt – Wert aller in einem Land produzierten Güter/Dienstleistungen"
+      },
+      {
+        "frage": "Nenne eine endogene Kraft der Landschaftsbildung.",
+        "antwort": "Plattentektonik / Vulkanismus / Erdbeben"
+      },
+      {
+        "frage": "Nenne eine exogene Kraft der Landschaftsbildung.",
+        "antwort": "Erosion / Verwitterung"
+      },
+      {
+        "frage": "Was zeigt eine Bevölkerungspyramide?",
+        "antwort": "Alters- und Geschlechtsstruktur einer Bevölkerung"
+      },
+      {
+        "frage": "Was gibt der Maßstab einer Karte an?",
+        "antwort": "Das Verhältnis von Kartenlänge zu tatsächlicher Länge in der Realität"
+      }
+    ],
+    "kind": "normal"
+  },
+  {
+    "id": "lz_grund_geschichte",
+    "fach": "Geschichte",
+    "thema": "Vorwissen für die 11. Klasse (Grundlagen aus Sek I)",
+    "dateLabel": "Vorwissen",
+    "lernzettel": "## Epochenüberblick (grobe Orientierung)\nAntike – Mittelalter – Frühe Neuzeit (Reformation, Absolutismus) – Französische Revolution – Industrialisierung – Deutsches Kaiserreich – Erster Weltkrieg – Weimarer Republik – Nationalsozialismus – Zweiter Weltkrieg – Nachkriegszeit/Kalter Krieg – Deutsche Teilung & Wiedervereinigung. Ein grobes zeitliches Grundgerüst hilft, neue Inhalte in der Oberstufe einzuordnen.\n\n## Zentrale Ereignisse, die sicher sitzen sollten\n- **Französische Revolution (1789)**: Ursachen, Verlauf, Ideen (Freiheit, Gleichheit, Brüderlichkeit)\n- **Erster Weltkrieg (1914–1918)**: Ursachen (Bündnissystem, Imperialismus), Kriegsverlauf, Folgen (Versailler Vertrag)\n- **Weimarer Republik**: Errungenschaften und strukturelle Schwächen\n- **Nationalsozialismus (1933–1945)**: Machtergreifung, Diktaturmerkmale, Holocaust, Zweiter Weltkrieg\n- **Nachkriegszeit**: Teilung Deutschlands, Kalter Krieg (Blockbildung), Mauerbau 1961, Mauerfall 1989, Wiedervereinigung 1990\n\n## Historische Arbeitsmethoden\n- **Quellenarten unterscheiden**: Quelle (zeitgenössisches Zeugnis) vs. Darstellung (spätere Deutung)\n- **Quellenkritik**: Autor, Entstehungszeit, Entstehungsanlass, Perspektive/Tendenz hinterfragen\n- Multiperspektivität: unterschiedliche Sichtweisen auf ein Ereignis erkennen\n\n## Grundbegriffe\nDemokratie, Diktatur, Monarchie, Revolution, Ideologie, Nationalismus, Imperialismus — sichere Definitionen sind Pflicht.\n\n## Was in Klasse 11 neu dazukommt\nVertiefte Quellen- und Darstellungsanalyse, komplexere historische Urteilsbildung, längere Essay-artige Texte, Vergleich verschiedener Deutungen (Historiografie). Sattelfestes Faktenwissen zu den Kernereignissen entlastet dich bei der anspruchsvolleren Methodenarbeit.",
+    "gaps": [],
+    "flashcards": [
+      {
+        "frage": "Wann war die Französische Revolution?",
+        "antwort": "Beginn 1789"
+      },
+      {
+        "frage": "Wann begann und endete der Erste Weltkrieg?",
+        "antwort": "1914–1918"
+      },
+      {
+        "frage": "Wann kam Hitler an die Macht?",
+        "antwort": "1933 (Machtergreifung/-übertragung)"
+      },
+      {
+        "frage": "Wann fiel die Berliner Mauer?",
+        "antwort": "9. November 1989"
+      },
+      {
+        "frage": "Wann war die deutsche Wiedervereinigung?",
+        "antwort": "3. Oktober 1990"
+      },
+      {
+        "frage": "Was unterscheidet Quelle und Darstellung?",
+        "antwort": "Quelle = zeitgenössisches Zeugnis, Darstellung = spätere Deutung/Interpretation"
+      },
+      {
+        "frage": "Was bedeutet Quellenkritik?",
+        "antwort": "Prüfung von Autor, Entstehungszeit, -anlass und Perspektive einer Quelle"
+      },
+      {
+        "frage": "Was besagt der Versailler Vertrag u. a.?",
+        "antwort": "Deutschland trägt Kriegsschuld, Gebietsverluste und Reparationszahlungen"
+      },
+      {
+        "frage": "Was ist Multiperspektivität?",
+        "antwort": "Betrachtung eines Ereignisses aus mehreren unterschiedlichen Sichtweisen"
+      },
+      {
+        "frage": "Was ist eine Diktatur?",
+        "antwort": "Herrschaftsform mit Machtkonzentration bei einer Person/Gruppe ohne demokratische Kontrolle"
+      }
+    ],
+    "kind": "normal"
+  },
+  {
+    "id": "lz_grund_chemie",
+    "fach": "Chemie",
+    "thema": "Vorwissen für die 11. Klasse (Grundlagen aus Sek I)",
+    "dateLabel": "Vorwissen",
+    "lernzettel": "## Atombau & Periodensystem\n- Aufbau des Atoms: Protonen, Neutronen, Elektronen; Kern und Hülle\n- Ordnungszahl = Protonenzahl, Massenzahl = Protonen + Neutronen\n- Periodensystem: Hauptgruppen, Perioden, Trends (Metallcharakter, Elektronegativität grob)\n- Elektronenschalen/Schalenmodell, Edelgaskonfiguration als Grundidee für Reaktionsverhalten\n\n## Chemische Bindungen\n- **Ionenbindung**: zwischen Metall und Nichtmetall, Ionengitter\n- **Elektronenpaarbindung (kovalent)**: zwischen Nichtmetallen, gemeinsame Elektronenpaare\n- **Metallbindung**: freie Elektronen, „Elektronengas“\n\n## Reaktionen & Gleichungen\n- Chemische Reaktionsgleichungen aufstellen und ausgleichen (Gesetz der Erhaltung der Masse)\n- Oxidation und Reduktion (Grundidee: Elektronenabgabe/-aufnahme)\n- Säuren und Basen: pH-Wert-Skala, Neutralisation, Indikatoren\n\n## Stoffmengen (Grundlagen)\nMol-Begriff als Grundidee (Stoffmenge), molare Masse, einfache stöchiometrische Berechnungen.\n\n## Trennverfahren & Stoffeigenschaften\nFiltration, Destillation, Chromatographie; Unterschied Gemisch vs. Reinstoff, physikalische vs. chemische Eigenschaften.\n\n## Was in Klasse 11 neu dazukommt\nVertiefte Stöchiometrie, chemisches Gleichgewicht, organische Chemie (Kohlenwasserstoffe, funktionelle Gruppen), Redoxreihen/Elektrochemie. Ein sicheres Verständnis von Atombau, Bindungsarten und Reaktionsgleichungen ist die Grundlage für praktisch jedes neue Thema.",
+    "gaps": [],
+    "flashcards": [
+      {
+        "frage": "Woraus besteht ein Atomkern?",
+        "antwort": "Protonen und Neutronen"
+      },
+      {
+        "frage": "Was gibt die Ordnungszahl an?",
+        "antwort": "Die Anzahl der Protonen im Atomkern"
+      },
+      {
+        "frage": "Was ist eine Ionenbindung?",
+        "antwort": "Elektrostatische Anziehung zwischen positiv und negativ geladenen Ionen (Metall + Nichtmetall)"
+      },
+      {
+        "frage": "Was passiert bei einer Oxidation?",
+        "antwort": "Elektronenabgabe"
+      },
+      {
+        "frage": "Was passiert bei einer Reduktion?",
+        "antwort": "Elektronenaufnahme"
+      },
+      {
+        "frage": "Was zeigt der pH-Wert an?",
+        "antwort": "Wie sauer oder basisch eine Lösung ist (0–14, 7 = neutral)"
+      },
+      {
+        "frage": "Was ist eine Neutralisation?",
+        "antwort": "Reaktion einer Säure mit einer Base zu Salz und Wasser"
+      },
+      {
+        "frage": "Was besagt das Gesetz der Erhaltung der Masse?",
+        "antwort": "Bei chemischen Reaktionen bleibt die Gesamtmasse der Edukte und Produkte gleich"
+      },
+      {
+        "frage": "Was ist ein Mol?",
+        "antwort": "Einheit der Stoffmenge (ca. $6{,}022\\times10^{23}$ Teilchen)"
+      },
+      {
+        "frage": "Was unterscheidet Gemisch und Reinstoff?",
+        "antwort": "Gemisch besteht aus mehreren Stoffen, Reinstoff aus nur einem"
+      }
+    ],
+    "kind": "normal"
+  },
+  {
+    "id": "lz_grund_ethik",
+    "fach": "Ethik",
+    "thema": "Vorwissen für die 11. Klasse (Grundlagen aus Sek I)",
+    "dateLabel": "Vorwissen",
+    "lernzettel": "## Grundbegriffe der Ethik\n- Unterschied **Moral** (gelebte Wertvorstellungen einer Gesellschaft) und **Ethik** (systematisches Nachdenken über Moral)\n- Werte, Normen, Pflichten — sicher voneinander abgrenzen können\n- Begriff der Verantwortung und Handlungsfreiheit als Grundvoraussetzung für ethisches Urteilen\n\n## Klassische ethische Positionen (Überblick)\n- **Deontologische Ethik (Kant)**: Handeln nach Pflicht, kategorischer Imperativ als Grundidee („Handle nur nach der Maxime, von der du wollen kannst, dass sie allgemeines Gesetz werde“)\n- **Konsequenzialismus/Utilitarismus**: Bewertung von Handlungen nach ihren Folgen, Ziel: größtmögliches Glück für die größtmögliche Zahl\n- **Tugendethik (Aristoteles)**: gutes Handeln als Ausdruck eines guten Charakters, „Mesotes“ (rechte Mitte)\n\n## Argumentations- und Urteilsbildung\n- Dilemma-Diskussionen: Pro- und Contra-Argumente sauber trennen, unterschiedliche ethische Positionen anwenden\n- Begriffe sauber definieren, bevor man argumentiert\n- Eigene Position begründet und nachvollziehbar vertreten, Gegenargumente ernst nehmen\n\n## Themenfelder, die meist schon angerissen wurden\nFreundschaft, Gerechtigkeit, Umgang mit Konflikten, Medienethik/Digitalisierung, Tierethik/Umweltethik als aktuelle Beispiele.\n\n## Was in Klasse 11 neu dazukommt\nVertiefte Auseinandersetzung mit philosophischen Grundpositionen (u. a. Feuerbach, Marx, weitere Ethik-Theorien), anspruchsvollere Textarbeit an Originalquellen, komplexere ethische Fallanalysen. Sichere Grundbegriffe und die drei klassischen Ethik-Ansätze sind die Basis, um neue Positionen einordnen zu können.",
+    "gaps": [],
+    "flashcards": [
+      {
+        "frage": "Unterschied zwischen Moral und Ethik?",
+        "antwort": "Moral = gelebte Werte/Normen einer Gesellschaft, Ethik = systematisches Nachdenken über Moral"
+      },
+      {
+        "frage": "Was ist der kategorische Imperativ (Kant)?",
+        "antwort": "Handle nur nach einer Maxime, von der du wollen kannst, dass sie allgemeines Gesetz wird"
+      },
+      {
+        "frage": "Worauf kommt es beim Utilitarismus an?",
+        "antwort": "Auf die Folgen einer Handlung — größtmögliches Glück für die größte Zahl"
+      },
+      {
+        "frage": "Was ist die Grundidee der Tugendethik?",
+        "antwort": "Gutes Handeln entspringt einem guten Charakter (Tugenden), rechte Mitte (Mesotes)"
+      },
+      {
+        "frage": "Wer gilt als Begründer der deontologischen Pflichtethik?",
+        "antwort": "Immanuel Kant"
+      },
+      {
+        "frage": "Wer gilt als Begründer der Tugendethik?",
+        "antwort": "Aristoteles"
+      },
+      {
+        "frage": "Was ist ein ethisches Dilemma?",
+        "antwort": "Eine Entscheidungssituation, in der jede Option gegen einen Wert/eine Pflicht verstößt"
+      },
+      {
+        "frage": "Was bedeutet Handlungsfreiheit als ethische Voraussetzung?",
+        "antwort": "Nur wer frei entscheiden kann, kann für sein Handeln moralisch verantwortlich gemacht werden"
+      },
+      {
+        "frage": "Was unterscheidet Werte und Normen?",
+        "antwort": "Werte sind allgemeine Vorstellungen vom Guten, Normen sind konkrete Verhaltensregeln daraus"
+      },
+      {
+        "frage": "Was ist Konsequenzialismus allgemein?",
+        "antwort": "Ethische Bewertung, die sich an den Folgen/Konsequenzen einer Handlung orientiert"
+      }
+    ],
+    "kind": "normal"
+  },
+  {
+    "id": "lz_grund_sport",
+    "fach": "Sport",
+    "thema": "Vorwissen für die 11. Klasse (Grundlagen aus Sek I)",
+    "dateLabel": "Vorwissen",
+    "lernzettel": "## Trainingslehre-Grundlagen\n- **Konditionelle Fähigkeiten**: Ausdauer, Kraft, Schnelligkeit, Beweglichkeit, Koordination — Definitionen kennen\n- **Trainingsprinzipien**: Prinzip des wirksamen Belastungsreizes, Superkompensation (Belastung → Erholung → Leistungssteigerung)\n- Aufwärmen: Ziele (Verletzungsprophylaxe, Leistungssteigerung) und Aufbau eines Warm-ups\n\n## Bewegungslehre\n- Grundlegende Bewegungsanalyse: Bewegungsphasen (Vorbereitung, Haupt-, Endphase) am Beispiel einer Sportart\n- Zusammenhang zwischen Technik und Leistung\n\n## Anatomie & Physiologie (Basics)\n- Grobe Muskelgruppen und ihre Funktion (z. B. Agonist/Antagonist-Prinzip)\n- Herz-Kreislauf-System unter Belastung: Pulsfrequenz, Belastungsherzfrequenz grob einschätzen können\n- Energiebereitstellung Grundidee: aerob vs. anaerob\n\n## Regelkunde & Sportartenwissen\nGrundregeln der in der Schule behandelten Sportarten (z. B. Volleyball, Basketball, Leichtathletik, Turnen) sicher kennen — wichtig für praktische Bewertungen und theoretische Aufgaben.\n\n## Was in Klasse 11 neu dazukommt\nTheoretische Vertiefung (z. B. Trainingssteuerung, sportbiologische Grundlagen im Detail), eigenständige Trainingsplanung, komplexere sporttheoretische Aufgaben in Klausuren neben der praktischen Note. Sattelfeste Grundbegriffe der Trainingslehre erleichtern die theoretischen Anteile enorm.",
+    "gaps": [],
+    "flashcards": [
+      {
+        "frage": "Was sind die 5 konditionellen Fähigkeiten?",
+        "antwort": "Ausdauer, Kraft, Schnelligkeit, Beweglichkeit, Koordination"
+      },
+      {
+        "frage": "Was ist Superkompensation?",
+        "antwort": "Leistungssteigerung über das Ausgangsniveau nach Belastung und ausreichender Erholung"
+      },
+      {
+        "frage": "Warum wärmt man sich vor dem Sport auf?",
+        "antwort": "Zur Verletzungsprophylaxe und Leistungssteigerung"
+      },
+      {
+        "frage": "Was bedeutet Agonist/Antagonist bei Muskeln?",
+        "antwort": "Agonist = ausführender Muskel, Antagonist = Gegenspieler-Muskel"
+      },
+      {
+        "frage": "Was ist der Unterschied zwischen aerober und anaerober Energiebereitstellung?",
+        "antwort": "Aerob = mit Sauerstoff, anaerob = ohne Sauerstoff (kurzfristig, z. B. Sprint)"
+      },
+      {
+        "frage": "Was zeigt die Pulsfrequenz unter Belastung?",
+        "antwort": "Wie stark das Herz-Kreislauf-System aktuell beansprucht wird"
+      },
+      {
+        "frage": "Was ist das Prinzip des wirksamen Belastungsreizes?",
+        "antwort": "Ein Trainingsreiz muss eine gewisse Intensität überschreiten, um eine Anpassung auszulösen"
+      },
+      {
+        "frage": "Was gehört zu den Bewegungsphasen einer Bewegung?",
+        "antwort": "Vorbereitungs-, Haupt- und Endphase"
+      },
+      {
+        "frage": "Nenne eine koordinative Fähigkeit.",
+        "antwort": "Z. B. Gleichgewichtsfähigkeit, Reaktionsfähigkeit oder Orientierungsfähigkeit"
+      },
+      {
+        "frage": "Was ist Ziel des Techniktrainings?",
+        "antwort": "Bewegungsabläufe ökonomisch und zielgerichtet auszuführen, um Leistung zu verbessern"
+      }
+    ],
+    "kind": "normal"
+  },
+  {
+    "id": "lz_grund_kunst",
+    "fach": "Kunst",
+    "thema": "Vorwissen für die 11. Klasse (Grundlagen aus Sek I)",
+    "dateLabel": "Vorwissen",
+    "lernzettel": "## Gestaltungsgrundlagen\n- **Bildaufbau**: Formate, Bildausschnitt, Perspektive (Zentralperspektive, Fluchtpunkt), Vordergrund/Mittelgrund/Hintergrund\n- **Farblehre**: Farbkreis, Primär-/Sekundär-/Tertiärfarben, Komplementärkontrast, Warm-Kalt-Kontrast, Farbwirkung/-symbolik\n- **Kompositionsprinzipien**: Symmetrie/Asymmetrie, Goldener Schnitt (Grundidee), Blickführung\n\n## Bildanalyse-Methodik\n- **Beschreibung** (was ist zu sehen, sachlich) vor **Analyse** (wie ist es gestaltet) vor **Interpretation** (was bedeutet es)\n- Formale Bildanalyse: Linie, Fläche, Farbe, Licht/Schatten, Material/Technik\n- Ikonografie/Ikonologie als Grundidee: Bildinhalte in einen Bedeutungskontext einordnen\n\n## Epochenüberblick (grobe Orientierung)\nAntike – Mittelalter – Renaissance – Barock – Klassizismus – Romantik – Realismus – Moderne (Impressionismus, Expressionismus, Kubismus, Surrealismus) – Zeitgenössische Kunst. Grobe stilistische Merkmale je Epoche kennen.\n\n## Praktisches Grundwissen\nGrundtechniken (Zeichnen, Malerei, Druckgrafik, ggf. Plastik/Skulptur), Materialkunde, sauberes und durchdachtes Skizzieren eigener Ideen dokumentieren können.\n\n## Was in Klasse 11 neu dazukommt\nVertiefte, eigenständige Bildanalyse und -interpretation auch bei zeitgenössischer/abstrakter Kunst, komplexere eigene Gestaltungsprojekte mit Reflexion des künstlerischen Prozesses. Ein sicherer Grundwortschatz aus Gestaltungslehre und Epochenüberblick hilft, neue Werke schnell einzuordnen.",
+    "gaps": [],
+    "flashcards": [
+      {
+        "frage": "Was ist der Komplementärkontrast?",
+        "antwort": "Kontrast zwischen zwei sich im Farbkreis gegenüberliegenden Farben (z. B. Rot–Grün)"
+      },
+      {
+        "frage": "Was sind die drei Grundschritte der Bildanalyse?",
+        "antwort": "Beschreibung – Analyse – Interpretation"
+      },
+      {
+        "frage": "Was ist die Zentralperspektive?",
+        "antwort": "Darstellungsweise, bei der alle Fluchtlinien auf einen Fluchtpunkt zulaufen"
+      },
+      {
+        "frage": "Was sind die Primärfarben?",
+        "antwort": "Rot, Gelb, Blau"
+      },
+      {
+        "frage": "Was ist der Warm-Kalt-Kontrast?",
+        "antwort": "Gegenüberstellung warmer (Rot, Orange) und kalter Farben (Blau, Grün) zur Wirkungssteigerung"
+      },
+      {
+        "frage": "Nenne eine Kunstepoche der Moderne.",
+        "antwort": "Z. B. Impressionismus, Expressionismus, Kubismus oder Surrealismus"
+      },
+      {
+        "frage": "Was untersucht die Ikonografie?",
+        "antwort": "Die Bedeutung und den Inhalt von Bildmotiven im historischen/kulturellen Kontext"
+      },
+      {
+        "frage": "Was zeigt der Goldene Schnitt an?",
+        "antwort": "Ein harmonisches Teilungsverhältnis (ca. 1:1,618), oft für ausgewogene Bildkomposition genutzt"
+      },
+      {
+        "frage": "Was ist Blickführung?",
+        "antwort": "Wie Linien, Formen und Kontraste das Auge des Betrachters durchs Bild lenken"
+      },
+      {
+        "frage": "Was unterscheidet Symmetrie und Asymmetrie in der Komposition?",
+        "antwort": "Symmetrie = spiegelgleiche Anordnung, Asymmetrie = bewusst ungleiche, oft spannungsreichere Anordnung"
+      }
+    ],
+    "kind": "normal"
+  },
+  {
+    "id": "lz_grund_franzoesisch",
+    "fach": "Französisch",
+    "thema": "Vorwissen für die 11. Klasse (Grundlagen aus Sek I)",
+    "dateLabel": "Vorwissen",
+    "lernzettel": "## Grammatik-Basics\n- **Zeiten**: Présent, Passé composé (mit avoir/être), Imparfait (Unterschied zu Passé composé: Verlauf vs. abgeschlossene Handlung), Futur proche und Futur simple\n- **Artikel**: bestimmt (le/la/les), unbestimmt (un/une/des), Teilungsartikel (du/de la/des)\n- **Pronomen**: COD/COI (me, te, le/la, lui, nous, vous, leur), Relativpronomen (qui, que, où)\n- **Adjektive**: Übereinstimmung in Genus und Numerus, Stellung vor/nach dem Nomen\n- **Verneinung**: ne...pas, ne...jamais, ne...plus, ne...rien\n\n## Wortschatz-Basisfelder\nAlltag, Familie, Schule, Freizeit, Reisen, Wegbeschreibung, Meinungsäußerung (je pense que, à mon avis) — als aktiver Grundwortschatz verfügbar haben.\n\n## Kommunikative Kompetenzen\n- Einfache zusammenhängende Texte verstehen und schreiben (Beschreibung, kurze Erzählung, persönlicher Brief/E-Mail)\n- Meinungen äußern und begründen können\n- Hör-/Leseverstehen: Hauptaussagen und wichtige Details erfassen\n\n## Landeskunde-Grundlagen\nGrobe Kenntnisse zu Frankreich und frankophonen Ländern (Geographie, Kultur, wichtige Feiertage/Traditionen).\n\n## Was in Klasse 11 neu dazukommt\nAnspruchsvollere Textsorten (Kommentar, Analyse literarischer/medialer Texte), Subjonctif, freies Sprechen zu komplexeren Themen (Gesellschaft, Politik, Umwelt), vertiefte Landeskunde. Ein sicheres Fundament in den Grundzeiten und im Basiswortschatz ist entscheidend, um dem schnelleren Tempo der Oberstufe zu folgen.",
+    "gaps": [],
+    "flashcards": [
+      {
+        "frage": "Mit welchen Hilfsverben bildet man das Passé composé?",
+        "antwort": "avoir oder être (+ Partizip Perfekt)"
+      },
+      {
+        "frage": "Wann benutzt man das Imparfait statt Passé composé?",
+        "antwort": "Für Beschreibungen, Gewohnheiten und andauernde Handlungen in der Vergangenheit"
+      },
+      {
+        "frage": "Wie bildet man das Futur proche?",
+        "antwort": "aller (konjugiert) + Infinitiv"
+      },
+      {
+        "frage": "Was ist der Teilungsartikel?",
+        "antwort": "du / de la / des — für unbestimmte Mengen (z. B. du pain)"
+      },
+      {
+        "frage": "Was bedeutet „ne...jamais“?",
+        "antwort": "niemals / nie"
+      },
+      {
+        "frage": "Wie lautet das Relativpronomen für Personen/Sachen als Subjekt?",
+        "antwort": "qui"
+      },
+      {
+        "frage": "Wie sagt man „meiner Meinung nach“?",
+        "antwort": "à mon avis"
+      },
+      {
+        "frage": "Wie stimmt man Adjektive im Französischen ab?",
+        "antwort": "In Genus (männlich/weiblich) und Numerus (Singular/Plural) mit dem Nomen"
+      },
+      {
+        "frage": "Was ist COD?",
+        "antwort": "Complément d'objet direct — direktes Objektpronomen (z. B. le, la, les)"
+      },
+      {
+        "frage": "Wie sagt man „ich denke, dass“?",
+        "antwort": "je pense que"
+      }
+    ],
+    "kind": "normal"
+  },
+  {
+    "id": "lz_grund_englisch",
+    "fach": "Englisch",
+    "thema": "Vorwissen für die 11. Klasse (Grundlagen aus Sek I)",
+    "dateLabel": "Vorwissen",
+    "lernzettel": "## Grammar Basics\n- **Tenses**: Simple Present vs. Present Progressive, Simple Past vs. Present Perfect (finished vs. connection to now), Past Progressive, Future (will / going to)\n- **Conditionals**: Zero, First, Second Conditional (if-Sätze) sicher unterscheiden\n- **Passive Voice**: Bildung und wann man es verwendet\n- **Reported Speech**: Zeitverschiebung bei indirekter Rede\n- **Relative Clauses**: who, which, that, whose\n\n## Vocabulary & Skills\n- Grundwortschatz zu Alltag, Schule, Medien, Umwelt, Gesellschaft\n- Connectives/linking words (however, moreover, therefore, in addition) für zusammenhängendes Schreiben\n- Reading & Listening: Hauptaussagen, Details und Meinung des Autors erfassen können\n\n## Textproduktion\n- **Summary**: sachlich, im eigenen Wort, im Present Tense\n- **Comment/Opinion Essay**: klare These, Argumente mit Beispielen, Gegenargumente einbeziehen\n- **Analysis**: Sprachmittel (rhetorical devices) wie repetition, rhetorical questions, imagery erkennen und benennen\n\n## Was in Klasse 11 neu dazukommt\nAnspruchsvollere literarische und mediale Texte (Romane, Reden, politische Texte), vertiefte Analyse von Stilmitteln, freies Diskutieren komplexer gesellschaftlicher Themen, mehr eigenständige Textproduktion unter Zeitdruck. Ein sicheres Zeiten- und Grammatikfundament sorgt dafür, dass du dich in Klausuren auf Inhalt statt auf Grammatikfehler konzentrieren kannst.",
+    "gaps": [],
+    "flashcards": [
+      {
+        "frage": "Wann benutzt man Present Perfect statt Simple Past?",
+        "antwort": "Wenn die Handlung eine Verbindung zur Gegenwart hat (Ergebnis/Auswirkung jetzt relevant)"
+      },
+      {
+        "frage": "Wie bildet man den First Conditional?",
+        "antwort": "if + Simple Present, ... will + Infinitiv"
+      },
+      {
+        "frage": "Wie bildet man das Passive?",
+        "antwort": "Form von to be + Partizip Perfekt (Past Participle)"
+      },
+      {
+        "frage": "Wie verschiebt sich die Zeit bei Reported Speech (Present Simple)?",
+        "antwort": "Present Simple wird zu Past Simple"
+      },
+      {
+        "frage": "Welches Relativpronomen für Personen als Subjekt?",
+        "antwort": "who"
+      },
+      {
+        "frage": "In welcher Zeitform schreibt man eine Summary?",
+        "antwort": "Present Tense"
+      },
+      {
+        "frage": "Nenne ein Linking Word für einen Gegensatz.",
+        "antwort": "however / on the other hand"
+      },
+      {
+        "frage": "Was ist ein rhetorical device?",
+        "antwort": "Ein sprachliches Stilmittel zur Wirkungssteigerung (z. B. repetition, rhetorical question, imagery)"
+      },
+      {
+        "frage": "Wann nutzt man Second Conditional?",
+        "antwort": "Für hypothetische/unwahrscheinliche Situationen in Gegenwart/Zukunft (if + Simple Past, ... would + Infinitiv)"
+      },
+      {
+        "frage": "Was gehört in einen guten Opinion Essay?",
+        "antwort": "Klare These, gut begründete Argumente mit Beispielen und mind. ein Gegenargument"
+      }
+    ],
+    "kind": "normal"
+  }
+];
+
+function lzMergeSeedDefaults(){
+  LZ_SEED_DEFAULTS.forEach(seed => {
+    lzCache.history[seed.fach] = lzCache.history[seed.fach] || [];
+    const exists = lzCache.history[seed.fach].some(i => i.id === seed.id);
+    if(!exists){
+      lzCache.history[seed.fach].unshift(Object.assign({}, seed));
+    }
+  });
+}
+
 let lzCache = { history: {}, klausur: {} };
 
 function lzUnlock(){
@@ -2067,6 +2747,7 @@ async function lzSyncFromSupabase(){
   if(!sb){
     if(status) status.textContent = 'Supabase nicht konfiguriert — Daten werden nur lokal gespeichert.';
     lzCache = { history: JSON.parse(localStorage.getItem(lzStoreKey())) || {}, klausur: JSON.parse(localStorage.getItem(lzKlausurStoreKey())) || {}, formeln: {} };
+    lzMergeSeedDefaults();
     return;
   }
   try{
@@ -2085,9 +2766,12 @@ async function lzSyncFromSupabase(){
       bucket[row.fach] = bucket[row.fach] || [];
       bucket[row.fach].push(item);
     });
+    lzMergeSeedDefaults();
   }catch(e){
     console.error('Supabase-Sync fehlgeschlagen', e);
     if(status) status.textContent = 'Konnte nicht mit Supabase verbinden — prüf die Zugangsdaten.';
+    lzCache = lzCache || { history: {}, klausur: {}, formeln: {} };
+    lzMergeSeedDefaults();
   }
 }
 async function lzDbInsert(item){
