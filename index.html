@@ -195,7 +195,8 @@
   .k-status.bad { background: var(--vollgas-bg); color: var(--vollgas); border: 1px solid var(--vollgas-border); }
   .k-status.neutral { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
   .k-klausur-list { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 0.6rem; }
-  .k-row { display: grid; grid-template-columns: 1fr 64px 56px auto; gap: 0.35rem; align-items: center; }
+  .k-row { display: grid; grid-template-columns: 1fr 64px 76px 48px auto; gap: 0.35rem; align-items: center; }
+  @media (max-width: 480px) { .k-row { grid-template-columns: 1fr 1fr; } .k-row input[type="number"], .k-row .k-del { grid-column: span 1; } }
   .k-row input[type="text"], .k-row select, .k-row input[type="number"] { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 0.35rem 0.45rem; color: var(--text); font-size: 0.75rem; font-family: 'Space Grotesk', sans-serif; outline: none; width: 100%; }
   .k-row input[type="number"] { font-family: 'JetBrains Mono', monospace; text-align: center; }
   .k-row input:focus, .k-row select:focus { border-color: var(--pruef); }
@@ -1842,7 +1843,7 @@ async function loadKlausurData() {
     if (zErr) throw zErr;
     (kRows || []).forEach(row => {
       if (!klausurState[row.fach]) klausurState[row.fach] = { ziel: null, items: [] };
-      klausurState[row.fach].items.push({ id: row.id, semester: row.semester, titel: row.titel, punkte: row.punkte === null ? null : Number(row.punkte) });
+      klausurState[row.fach].items.push({ id: row.id, semester: row.semester, titel: row.titel, punkte: row.punkte === null ? null : Number(row.punkte), typ: row.typ || 'Klausur' });
     });
     (zRows || []).forEach(row => {
       if (!klausurState[row.fach]) klausurState[row.fach] = { ziel: null, items: [] };
@@ -1876,6 +1877,10 @@ function renderKlausurCards() {
           <select onchange="updateKlausurField('${it.id}','semester',this.value)">
             ${SEM_LABELS.map(l => `<option ${l === it.semester ? 'selected' : ''}>${l}</option>`).join('')}
           </select>
+          <select onchange="updateKlausurField('${it.id}','typ',this.value)" title="Klausur oder Sonstige Note (je 50% gewichtet)">
+            <option value="Klausur" ${(it.typ || 'Klausur') === 'Klausur' ? 'selected' : ''}>Klausur</option>
+            <option value="Sonstige" ${it.typ === 'Sonstige' ? 'selected' : ''}>Sonstige Note</option>
+          </select>
           <input type="number" min="0" max="15" value="${it.punkte === null ? '' : it.punkte}" placeholder="offen" onchange="updateKlausurField('${it.id}','punkte',this.value)">
           <button class="k-del" onclick="removeKlausur('${it.id}')" title="Löschen">✕</button>
         </div>`).join('')}
@@ -1885,54 +1890,88 @@ function renderKlausurCards() {
   }).join('');
 }
 
-function computeFachStats(fachName) {
-  const st = klausurState[fachName] || { ziel: null, items: [] };
-  const written = st.items.filter(i => i.punkte !== null && i.punkte !== '' && !isNaN(i.punkte));
-  const upcoming = st.items.filter(i => i.punkte === null || i.punkte === '' || isNaN(i.punkte));
+// Berechnet Ø, Bedarf und Status für eine einzelne Kategorie (Klausuren ODER Sonstige Noten) innerhalb eines Fachs.
+function computeTypStats(items, ziel) {
+  const written = items.filter(i => i.punkte !== null && i.punkte !== '' && !isNaN(i.punkte));
+  const upcoming = items.filter(i => i.punkte === null || i.punkte === '' || isNaN(i.punkte));
   const avgWritten = written.length ? written.reduce((a,b) => a + Number(b.punkte), 0) / written.length : null;
 
+  if (items.length === 0) return { avgWritten: null, needed: null, upcomingCount: 0, hasItems: false };
+  if (ziel === null || ziel === '') return { avgWritten, needed: null, upcomingCount: upcoming.length, hasItems: true };
+
+  const z = Number(ziel);
+  if (upcoming.length === 0) {
+    return { avgWritten, needed: null, upcomingCount: 0, hasItems: true, zielErreicht: avgWritten !== null ? avgWritten >= z : null };
+  }
+  const sumWritten = written.reduce((a,b) => a + Number(b.punkte), 0);
+  const totalNeeded = z * (written.length + upcoming.length);
+  const neededAvg = (totalNeeded - sumWritten) / upcoming.length;
+  return { avgWritten, needed: neededAvg, upcomingCount: upcoming.length, hasItems: true };
+}
+
+function computeFachStats(fachName) {
+  const st = klausurState[fachName] || { ziel: null, items: [] };
+  const klausurItems = st.items.filter(i => (i.typ || 'Klausur') === 'Klausur');
+  const sonstItems = st.items.filter(i => i.typ === 'Sonstige');
+  const kStats = computeTypStats(klausurItems, st.ziel);
+  const sStats = computeTypStats(sonstItems, st.ziel);
+
+  // Gesamt-Ø je Fach: Klausuren zählen 50%, Sonstige Noten zählen 50%. Gibt es nur eine der beiden
+  // Kategorien, zählt diese entsprechend 100%.
+  let avgWritten = null;
+  if (kStats.avgWritten !== null && sStats.avgWritten !== null) avgWritten = 0.5 * kStats.avgWritten + 0.5 * sStats.avgWritten;
+  else if (kStats.avgWritten !== null) avgWritten = kStats.avgWritten;
+  else if (sStats.avgWritten !== null) avgWritten = sStats.avgWritten;
+
+  const upcomingCount = kStats.upcomingCount + sStats.upcomingCount;
+
   if (st.items.length === 0) {
-    return { statusClass: 'neutral', statusText: 'Noch keine Klausuren erfasst.', avgWritten, needed: null, upcomingCount: upcoming.length };
+    return { statusClass: 'neutral', statusText: 'Noch keine Klausuren/Noten erfasst.', avgWritten, needed: null, upcomingCount: 0 };
   }
   if (st.ziel === null || st.ziel === '') {
-    let txt = avgWritten !== null ? `Aktueller Ø: <strong>${avgWritten.toFixed(1)} Pkt</strong> — setz ein Ziel für die Bedarfsrechnung.` : 'Setz ein Ziel für die Bedarfsrechnung.';
-    return { statusClass: 'neutral', statusText: txt, avgWritten, needed: null, upcomingCount: upcoming.length };
+    let txt = avgWritten !== null ? `Aktueller Ø: <strong>${avgWritten.toFixed(1)} Pkt</strong> (Klausuren 50% / Sonstige 50%) — setz ein Ziel für die Bedarfsrechnung.` : 'Setz ein Ziel für die Bedarfsrechnung.';
+    return { statusClass: 'neutral', statusText: txt, avgWritten, needed: null, upcomingCount };
   }
   const ziel = Number(st.ziel);
-  if (upcoming.length === 0) {
+
+  // Textbausteine pro Kategorie
+  const kTxt = !kStats.hasItems ? null
+    : kStats.needed === null
+      ? (kStats.avgWritten !== null ? `Klausuren Ø ${kStats.avgWritten.toFixed(1)} Pkt` : null)
+      : `Klausuren: Ø <strong>${kStats.needed.toFixed(1)} Pkt</strong> in den restlichen ${kStats.upcomingCount} nötig`;
+  const sTxt = !sStats.hasItems ? null
+    : sStats.needed === null
+      ? (sStats.avgWritten !== null ? `Sonstige Ø ${sStats.avgWritten.toFixed(1)} Pkt` : null)
+      : `Sonstige Noten: Ø <strong>${sStats.needed.toFixed(1)} Pkt</strong> in den restlichen ${sStats.upcomingCount} nötig`;
+
+  if (upcomingCount === 0) {
     if (avgWritten === null) return { statusClass: 'neutral', statusText: 'Noch keine Punkte eingetragen.', avgWritten, needed: null, upcomingCount: 0 };
     const cls = avgWritten >= ziel ? 'ok' : 'bad';
     const txt = avgWritten >= ziel
-      ? `Ziel erreicht! Aktueller Ø: <strong>${avgWritten.toFixed(1)} Pkt</strong> (Ziel ${ziel}).`
-      : `Alle Klausuren geschrieben, Ø <strong>${avgWritten.toFixed(1)} Pkt</strong> — Ziel von ${ziel} Pkt knapp verfehlt.`;
+      ? `Ziel erreicht! Aktueller Ø: <strong>${avgWritten.toFixed(1)} Pkt</strong> (Ziel ${ziel}, 50/50 Klausuren/Sonstige).`
+      : `Alles erfasst, Ø <strong>${avgWritten.toFixed(1)} Pkt</strong> (50/50) — Ziel von ${ziel} Pkt knapp verfehlt.`;
     return { statusClass: cls, statusText: txt, avgWritten, needed: null, upcomingCount: 0 };
   }
-  const sumWritten = written.reduce((a,b) => a + Number(b.punkte), 0);
-  const totalNeeded = ziel * (written.length + upcoming.length);
-  const neededSum = totalNeeded - sumWritten;
-  const neededAvg = neededSum / upcoming.length;
-  let cls, txt;
-  if (neededAvg <= 0) {
-    cls = 'ok'; txt = `Ziel schon gesichert — in den restlichen ${upcoming.length} Klausur(en) reichen theoretisch 0 Punkte.`;
-  } else if (neededAvg > 15) {
-    cls = 'bad'; txt = `Ziel von ${ziel} Pkt ist rechnerisch nicht mehr erreichbar (bräuchtest ${neededAvg.toFixed(1)} Pkt Ø in den restlichen ${upcoming.length}).`;
-  } else if (neededAvg > 12) {
-    cls = 'bad'; txt = `Du brauchst im Schnitt <strong>${neededAvg.toFixed(1)} Pkt</strong> in den restlichen ${upcoming.length} Klausur(en) — sehr sportlich.`;
-  } else if (neededAvg > 9) {
-    cls = 'warn'; txt = `Du brauchst im Schnitt <strong>${neededAvg.toFixed(1)} Pkt</strong> in den restlichen ${upcoming.length} Klausur(en), um dein Ziel von ${ziel} zu erreichen.`;
-  } else {
-    cls = 'ok'; txt = `Gut im Plan: im Schnitt <strong>${neededAvg.toFixed(1)} Pkt</strong> in den restlichen ${upcoming.length} Klausur(en) reichen für dein Ziel von ${ziel}.`;
-  }
-  return { statusClass: cls, statusText: txt, avgWritten, needed: neededAvg, upcomingCount: upcoming.length };
+
+  const combinedTxt = [kTxt, sTxt].filter(Boolean).join(' · ');
+  const worstNeeded = Math.max(kStats.needed || 0, sStats.needed || 0);
+  let cls;
+  if (worstNeeded <= 0) cls = 'ok';
+  else if (worstNeeded > 12) cls = 'bad';
+  else if (worstNeeded > 9) cls = 'warn';
+  else cls = 'ok';
+  const txt = `${combinedTxt} <span style="opacity:0.7">(Ziel ${ziel} Pkt, Klausuren 50% / Sonstige 50%)</span>`;
+
+  return { statusClass: cls, statusText: txt, avgWritten, needed: worstNeeded, upcomingCount };
 }
 
 function addKlausur(fachName) {
   if (!klausurState[fachName]) klausurState[fachName] = { ziel: null, items: [] };
   const items = klausurState[fachName].items;
-  const item = { id: kUid(), semester: SEM_LABELS[0], titel: `Klausur ${items.length + 1}`, punkte: null };
+  const item = { id: kUid(), semester: SEM_LABELS[0], titel: `Klausur ${items.length + 1}`, punkte: null, typ: 'Klausur' };
   items.push(item);
   renderKlausurCards();
-  sb.from('klausuren').insert({ id: item.id, fach: fachName, semester: item.semester, titel: item.titel, punkte: null }).then(({error}) => { if (error) console.error(error); });
+  sb.from('klausuren').insert({ id: item.id, fach: fachName, semester: item.semester, titel: item.titel, punkte: null, typ: item.typ }).then(({error}) => { if (error) console.error(error); });
 }
 
 function removeKlausur(id) {
@@ -1960,7 +1999,7 @@ function updateKlausurField(id, field, value) {
   renderKlausurCards();
   clearTimeout(kSaveTimers[id]);
   kSaveTimers[id] = setTimeout(() => {
-    sb.from('klausuren').update({ semester: item.semester, titel: item.titel, punkte: item.punkte }).eq('id', id).then(({error}) => { if (error) console.error(error); });
+    sb.from('klausuren').update({ semester: item.semester, titel: item.titel, punkte: item.punkte, typ: item.typ || 'Klausur' }).eq('id', id).then(({error}) => { if (error) console.error(error); });
   }, 400);
 }
 
@@ -1998,8 +2037,8 @@ async function kiAnalyse() {
     const st = klausurState[f.name] || { ziel: null, items: [] };
     if (st.items.length === 0) return null;
     const stats = computeFachStats(f.name);
-    const klausurenTxt = st.items.map(i => `  - ${i.titel} (${i.semester}): ${i.punkte === null ? 'noch offen' : i.punkte + ' Pkt'}`).join('\n');
-    return `${f.name}${f.lk ? ' (LK)' : ''}${f.pruef ? ' (Prüfungsfach)' : ''} — Ziel: ${st.ziel === null ? 'kein Ziel gesetzt' : st.ziel + ' Pkt'}\n${klausurenTxt}\nBerechneter Bedarf pro offener Klausur: ${stats.needed !== null ? stats.needed.toFixed(1) + ' Pkt' : '—'}`;
+    const klausurenTxt = st.items.map(i => `  - [${i.typ || 'Klausur'}] ${i.titel} (${i.semester}): ${i.punkte === null ? 'noch offen' : i.punkte + ' Pkt'}`).join('\n');
+    return `${f.name}${f.lk ? ' (LK)' : ''}${f.pruef ? ' (Prüfungsfach)' : ''} — Ziel: ${st.ziel === null ? 'kein Ziel gesetzt' : st.ziel + ' Pkt'} (Klausuren zählen 50%, Sonstige Noten 50%)\n${klausurenTxt}\nBerechneter Bedarf: ${stats.needed !== null ? stats.needed.toFixed(1) + ' Pkt' : '—'}`;
   }).filter(Boolean).join('\n\n');
 
   if (!summary) {
